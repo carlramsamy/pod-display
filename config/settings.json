@@ -1,0 +1,6 @@
+{
+  "imageDuration": 10,
+  "calendarDuration": 20,
+  "nextBookingDuration": 10,
+  "idleTimeout": 120
+}

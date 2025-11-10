@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tracc Civil Pod Display</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;color:#fff;font-family:-apple-system,Segoe UI,Arial,sans-serif;overflow:hidden}
+  #content{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center}
+  img.pod-image{max-width:100%;max-height:100%;object-fit:cover;transition:opacity 1s}
+  .logo{position:fixed;top:20px;right:20px;width:120px;opacity:0.85}
+  h1{color:#FF7A00;margin-bottom:0.5em;font-size:3vw}
+  h2{color:#009444;margin-top:0;margin-bottom:0.25em;font-size:1.5vw}
+</style>
+</head>
+<body>
+  <div id="content"><h1>Loading...</h1></div>
+  <img src="assets/logo.png" class="logo" alt="Tracc Civil Logo">
+<script>
+const settings={imageDuration:10,calendarDuration:20,nextBookingDuration:10,idleTimeout:120};
+const podParams=new URLSearchParams(window.location.search);
+const pod=podParams.get("pod")||"ElephantRocks";
+const podImages={
+  ElephantRocks:["Pod-Images/ElephantRocks/ElephantRock1.jpg","Pod-Images/ElephantRocks/ElephantRock2.jpeg","Pod-Images/ElephantRocks/ElephantRock3.webp"],
+  LuckyBay:["Pod-Images/LuckyBay/LuckyBay1.jpg","Pod-Images/LuckyBay/LuckyBay2.webp","Pod-Images/LuckyBay/LuckyBay3.jpg"],
+  FernsPool:["Pod-Images/FernsPool/FernsPool1.webp","Pod-Images/FernsPool/FernsPool2.webp","Pod-Images/FernsPool/FernsPool3.jpg"]
+};
+const content=document.getElementById("content");
+let stage=0,index=0;
+function showTitle(){
+  content.innerHTML=`<h1>${pod.replace(/([A-Z])/g,' $1').trim()} Pod</h1>`;
+  setTimeout(showCalendar,3000);
+}
+function showCalendar(){
+  content.innerHTML=`<h1>Bookings for November 2025</h1><h2>(Placeholder calendar)</h2>`;
+  setTimeout(showNextBooking,settings.calendarDuration*1000);
+}
+function showNextBooking(){
+  content.innerHTML=`<h1>Next Booking</h1><h2>Team Meeting – 2:30 PM</h2>`;
+  setTimeout(showImage,settings.nextBookingDuration*1000);
+}
+function showImage(){
+  const imgs=podImages[pod]||[];
+  if(!imgs.length){content.innerHTML=`<h1>No images for ${pod}</h1>`;return;}
+  const img=document.createElement("img");
+  img.src=imgs[index];
+  img.className="pod-image";
+  content.innerHTML="";
+  content.appendChild(img);
+  index=(index+1)%imgs.length;
+  setTimeout(()=>{img.style.opacity=0;showImage();},settings.imageDuration*1000);
+}
+showTitle();
+</script>
+</body>
+</html>
