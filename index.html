@@ -225,32 +225,43 @@ const weekdayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   qs('#podTitle').textContent = prettyName;
 
   // Fetch bookings
-  const endpoint = podCfg.endpoint || podCfg.url || podCfg.logicApp;
-  if(!endpoint){ alert('No endpoint configured for pod: '+podParam); return; }
-  bookings = await fetch(endpoint, {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'})
-    .then(r=>r.json())
-    .catch(e=>{
-      console.error(e);
-      return [];
-    });
-  // Normalize bookings -> {subject, organizer, location, start:Date, end:Date}
-  bookings = (bookings||[]).map(b=>{
-    const start = parseAU(b.start);
-    const end = parseAU(b.end);
-    return {subject:(b.subject||'').trim(), organizer:(b.organizer||'').trim(), location:(b.location||'').trim(), start, end};
-  }).filter(e=>e.start && e.end);
+const endpoint = podCfg.endpoint;
+if(!endpoint){ alert('No endpoint configured for pod: '+podParam); return; }
+bookings = await fetch(endpoint, {
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:'{}'
+})
+  .then(r=>r.json())
+  .catch(e=>{
+    console.error(e);
+    return [];
+  });
 
-  // Build structures
-  bookings.sort((a,b)=>a.start-b.start);
-  dayMap = groupByDay(bookings);
+// Normalize bookings
+bookings = (bookings||[]).map(b=>{
+  const start = parseAU(b.start);
+  const end = parseAU(b.end);
+  return {
+    subject:(b.subject||'').trim(),
+    organizer:(b.organizer||'').trim(),
+    location:(b.location||podCfg.displayName||podParam).trim(),
+    start,
+    end
+  };
+}).filter(e=>e.start && e.end);
 
-  // Render slides initial
-  renderNextSlide();
-  renderMonthSlide();
+// Build structures
+bookings.sort((a,b)=>a.start-b.start);
+dayMap = groupByDay(bookings);
 
-  // Prepare images
-  imageList = await resolveImagesList(podCfg, podParam);
-  startSlideshowLoop();
+// Render slides
+renderNextSlide();
+renderMonthSlide();
+
+// Prepare images
+imageList = await resolveImagesList({ imageFolder: podCfg.imagesPath }, podParam);
+startSlideshowLoop();
 })();
 
 /* -------------------- SLIDE LOOP -------------------- */
