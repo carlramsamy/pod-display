@@ -1,94 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light only">
 <title>Tracc Civil | Pod Display</title>
 <style>
-:root{
-  --bg:#f8f9fb;--card:#fff;--ink:#1e1f24;--muted:#5a5f6d;--accent:#0b5fff;
-  --busy:#22a559;--free:#e9edf4;--shadow:0 10px 28px rgba(40,44,63,.06);
-  --radius:20px;--brand:#0b2746;
-}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);
+html,body{margin:0;height:100%;background:#fff;color:#1e1f24;
   font:400 18px/1.5 "Segoe UI",Roboto,Inter,Helvetica,Arial;}
-.wrap{display:flex;flex-direction:column;min-height:100vh}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
 header{display:flex;justify-content:space-between;align-items:center;
-  padding:20px 40px;background:#fff;border-bottom:1px solid #e5e8ee;}
-header img.logo{height:60px;}
-header .title{font-size:30px;font-weight:800;color:var(--brand);}
-header .weather{display:flex;align-items:center;gap:10px;
-  font-weight:600;color:var(--muted);}
+  width:100%;max-width:1800px;padding:20px 40px 10px 40px;background:#fff;box-sizing:border-box;}
+header img{height:60px}
+header h1{font-size:30px;margin:0;color:#0b2746;font-weight:800}
+header .weather{display:flex;align-items:center;gap:8px;font-weight:600;color:#5a5f6d}
 header .weather img{width:36px;height:36px}
-main{flex:1;display:flex;align-items:center;justify-content:center;padding:10px}
-.card{background:var(--card);border-radius:var(--radius);
-  box-shadow:var(--shadow);padding:30px 36px;max-width:1180px;width:90%;
-  margin:auto;}
-.slide{display:none;opacity:0;transition:opacity .8s ease;}
+main{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
+.card{background:#fff;border-radius:20px;box-shadow:0 8px 25px rgba(0,0,0,.1);
+  padding:30px 36px;margin:auto;max-width:1200px;width:90%;box-sizing:border-box;
+  transform-origin:top center;}
+@media (max-height:950px){.card{transform:scale(.9)}}
+.slide{display:none;opacity:0;transition:opacity .7s ease}
 .slide.active{display:block;opacity:1}
 
-/* ---- Next booking ---- */
-.next-container{text-align:center;}
-.kv{display:inline-grid;grid-template-columns:150px auto;gap:8px 14px;
-  margin:16px auto 26px;text-align:left;}
-.kv .k{color:var(--muted);text-align:right;font-weight:600;}
-.schedule .row{display:flex;align-items:center;justify-content:center;
-  gap:10px;margin:5px 0;}
-.time{width:70px;font-weight:700;color:var(--muted);text-align:right;}
-.pill{flex:0 1 240px;padding:8px 12px;border-radius:10px;text-align:center;
-  font-weight:700;}
-.busy{background:#d8f2e0;color:#167a46;border:1px solid #a3e0b7;}
-.free{background:var(--free);color:#7a8499;border:1px dashed #d7dde8;}
+/* next booking */
+.next{ text-align:center;}
+.kv{display:inline-grid;grid-template-columns:150px auto;gap:8px 14px;text-align:left;margin:16px auto 26px}
+.kv .k{color:#5a5f6d;text-align:right;font-weight:600}
+.schedule .row{display:flex;align-items:center;justify-content:center;gap:10px;margin:5px 0}
+.time{width:70px;font-weight:700;color:#5a5f6d;text-align:right}
+.pill{flex:0 1 240px;padding:8px 12px;border-radius:10px;text-align:center;font-weight:700}
+.free{background:#eef1f6;border:1px dashed #ccd1dc;color:#7a8499}
+.busy{background:#c9eed6;border:1px solid #84d59c;color:#166b3f}
 
-/* ---- Month ---- */
-.month-head{text-align:center;margin-bottom:20px;}
-.month{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-.weekday{font-weight:700;color:var(--muted);text-align:center;}
-.day{min-height:90px;border:1px solid #eceff4;border-radius:12px;
-  padding:4px 4px 6px;position:relative;background:#fff;}
-.day.today{outline:2px solid var(--accent);}
-.num{position:absolute;top:4px;right:8px;font-weight:700;color:#9aa3b2;}
-.bar{margin-top:22px;background:var(--busy);color:#fff;font-size:12px;
-  border-radius:6px;padding:2px 6px;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis;}
+/* month view */
+.month{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.weekday{font-weight:700;color:#5a5f6d;text-align:center}
+.day{min-height:88px;border:1px solid #e8ebf1;border-radius:10px;position:relative}
+.day.today{outline:2px solid #0b5fff}
+.num{position:absolute;top:4px;right:6px;font-weight:700;color:#9aa3b2}
+.bar{margin-top:22px;background:#22a559;color:#fff;font-size:12px;border-radius:6px;
+  padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .empty{color:#ccc;text-align:center;font-size:12px;margin-top:30px}
 
-/* ---- Images ---- */
-.img-stage{height:70vh;display:flex;align-items:center;
-  justify-content:center;overflow:hidden;border-radius:16px;
-  background:#000;}
-.img-stage img{max-width:100%;max-height:100%;object-fit:cover;
-  position:absolute;opacity:0;transition:opacity 1s ease;}
+/* images */
+.img-stage{height:70vh;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;border-radius:16px;background:#000}
+.img-stage img{max-width:100%;max-height:100%;object-fit:cover;position:absolute;opacity:0;transition:opacity 1s}
 .img-stage img.show{opacity:1}
-
-/* ---- Footer ---- */
-footer{padding:14px 26px;text-align:center;font-size:14px;
-  color:#999;}
+footer{font-size:14px;color:#999;margin-bottom:10px}
 </style>
 </head>
 <body>
-<div class="wrap">
 <header>
   <div style="display:flex;align-items:center;gap:16px;">
-    <img class="logo" src="assets/TraccLogo1.png" alt="TRACC"/>
-    <div class="title" id="podTitle">Pod</div>
+    <img src="assets/TraccLogo1.png" alt="TRACC Civil">
+    <h1 id="podTitle">Pod</h1>
   </div>
-  <div class="weather" id="weather"><img id="wxIcon" alt=""><span id="wxText"></span></div>
+  <div class="weather" id="weather"><img id="wxIcon"><span id="wxText"></span></div>
 </header>
 
 <main>
-  <!-- 1 -->
   <section class="slide active" id="slide-next">
-    <div class="card next-container">
+    <div class="card next">
       <h2>Next Booking</h2>
-      <div id="nextFallback" style="display:none;color:#999">No upcoming bookings</div>
-      <div id="nextDetail">
+      <div id="noNext" style="display:none;color:#777">No upcoming bookings</div>
+      <div id="nextBox">
         <div class="kv">
-          <div class="k">Subject</div><div id="nb-subject">—</div>
-          <div class="k">Organizer</div><div id="nb-org">—</div>
-          <div class="k">Date</div><div id="nb-date">—</div>
-          <div class="k">Time</div><div id="nb-time">—</div>
-          <div class="k">Location</div><div id="nb-loc">—</div>
+          <div class="k">Subject</div><div id="nb-subject">–</div>
+          <div class="k">Organizer</div><div id="nb-org">–</div>
+          <div class="k">Date</div><div id="nb-date">–</div>
+          <div class="k">Time</div><div id="nb-time">–</div>
+          <div class="k">Location</div><div id="nb-loc">–</div>
         </div>
         <h3>Today's Schedule</h3>
         <div id="todayGrid" class="schedule"></div>
@@ -96,85 +79,87 @@ footer{padding:14px 26px;text-align:center;font-size:14px;
     </div>
   </section>
 
-  <!-- 2 -->
   <section class="slide" id="slide-month">
     <div class="card">
-      <div class="month-head">
-        <h2>Monthly View</h2>
-        <div class="subtle" id="monthLabel"></div>
-      </div>
+      <h2 style="text-align:center;margin-top:0">Monthly View</h2>
+      <div style="text-align:center;margin-bottom:10px" id="monthLabel"></div>
       <div class="month" id="weekdayRow"></div>
       <div class="month" id="monthGrid"></div>
     </div>
   </section>
 
-  <!-- 3 -->
   <section class="slide" id="slide-images">
     <div class="card">
-      <h2 style="text-align:center;margin-bottom:12px">Gallery</h2>
-      <div class="img-stage"><img id="imgA"/><img id="imgB"/></div>
+      <h2 style="text-align:center">Gallery</h2>
+      <div class="img-stage"><img id="imgA"><img id="imgB"></div>
     </div>
   </section>
 </main>
-
 <footer>© Tracc Civil | Pod Display System</footer>
-</div>
 
 <script>
 const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
 const fmtHM=d=>d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
 const fmtDate=d=>d.toLocaleDateString('en-AU',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
 const zero=n=>(n<10?'0':'')+n;
-function parseAU(str){
+
+// parse "DD/MM/YYYY HH:mm" -> Date adjusted to Perth local if needed
+function parseTime(str){
   const m=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
   if(!m)return null;
-  const[d,mo,y,h,mi]=m.slice(1).map(Number);
-  // Convert UTC to Perth (UTC+8)
-  const utc=Date.UTC(y,mo-1,d,h,mi);
-  return new Date(utc+8*3600*1000);
+  const [_,d,mo,y,h,mi]=m.map(Number);
+  const raw=new Date(Date.UTC(y,mo-1,d,h,mi));
+  const diff=(new Date()).getTimezoneOffset();
+  const local=new Date(raw.getTime()-diff*60000);
+  // detect if API times already local
+  const delta=Math.abs(local.getHours()-h);
+  if(delta>8)return new Date(raw.getTime()+8*3600000);
+  return local;
 }
-function groupByDay(events){
-  const map={};
-  for(const e of events){
-    const k=`${e.start.getFullYear()}-${zero(e.start.getMonth()+1)}-${zero(e.start.getDate())}`;
-    (map[k]??=[]).push(e);
-  }
-  Object.values(map).forEach(v=>v.sort((a,b)=>a.start-b.start));
-  return map;
-}
+
 const urlParams=new URLSearchParams(location.search);
 const podParam=(urlParams.get('pod')||'FernsPool').trim();
-const SLIDE_MS_NEXT=15000,SLIDE_MS_MONTH=15000,IMG_S=10;
+
 let bookings=[],dayMap={},imageList=[],slideIndex=0;
+const SLIDE_MS_NEXT=15000,SLIDE_MS_MONTH=15000,IMG_S=10;
+
 (async()=>{
-  await loadWeather();
+  loadWeather();
   const cfg=await fetch('config/settings.json?cb='+Date.now()).then(r=>r.json());
   const podCfg=cfg.pods[podParam];
-  if(!podCfg)return alert('Pod not in settings.json');
   qs('#podTitle').textContent=podCfg.displayName||podParam;
-  const endpoint=podCfg.endpoint;
-  const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(r=>r.json()).catch(()=>[]);
-  bookings=(res||[]).map(b=>{
-    const s=parseAU(b.start),e=parseAU(b.end);
-    return{subject:b.subject||'',organizer:b.organizer||'',location:b.location||podCfg.displayName,start:s,end:e};
-  }).filter(v=>v.start&&v.end).sort((a,b)=>a.start-b.start);
-  dayMap=groupByDay(bookings);
+
+  const res=await fetch(podCfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+    .then(r=>r.json()).catch(()=>[]);
+  bookings=(res||[]).map(b=>({subject:b.subject||'',organizer:b.organizer||'',
+    location:b.location||podCfg.displayName,start:parseTime(b.start),end:parseTime(b.end)}))
+    .filter(v=>v.start&&v.end).sort((a,b)=>a.start-b.start);
+  group();
   renderNext();renderMonth();
   imageList=await resolveImages(podCfg.imagesPath);
   runSlides();
 })();
-function showSlide(id){qsa('.slide').forEach(s=>s.classList.remove('active'));qs(id).classList.add('active');}
-function runSlides(){slideIndex=0;step();}
-function step(){
-  if(slideIndex===0){showSlide('#slide-next');renderNext();setTimeout(()=>{slideIndex=1;step();},SLIDE_MS_NEXT);}
-  else if(slideIndex===1){showSlide('#slide-month');renderMonth();setTimeout(()=>{slideIndex=2;step();},SLIDE_MS_MONTH);}
-  else{showSlide('#slide-images');runImages().then(()=>{slideIndex=0;step();});}
+
+function group(){
+  dayMap={};
+  for(const e of bookings){
+    const k=`${e.start.getFullYear()}-${zero(e.start.getMonth()+1)}-${zero(e.start.getDate())}`;
+    (dayMap[k]??=[]).push(e);
+  }
 }
+function showSlide(id){qsa('.slide').forEach(s=>s.classList.remove('active'));qs(id).classList.add('active');}
+function runSlides(){slideIndex=0;cycle();}
+function cycle(){
+  if(slideIndex===0){showSlide('#slide-next');renderNext();setTimeout(()=>{slideIndex=1;cycle();},SLIDE_MS_NEXT);}
+  else if(slideIndex===1){showSlide('#slide-month');renderMonth();setTimeout(()=>{slideIndex=2;cycle();},SLIDE_MS_MONTH);}
+  else{showSlide('#slide-images');runImages().then(()=>{slideIndex=0;cycle();});}
+}
+
 function renderNext(){
-  const now=new Date(),next=bookings.find(b=>b.end>now);
-  const detail=qs('#nextDetail'),fb=qs('#nextFallback');
-  if(!next){detail.style.display='none';fb.style.display='block';return;}
-  fb.style.display='none';detail.style.display='block';
+  const now=new Date();
+  const next=bookings.find(b=>b.end>now);
+  if(!next){qs('#noNext').style.display='block';qs('#nextBox').style.display='none';return;}
+  qs('#noNext').style.display='none';qs('#nextBox').style.display='block';
   qs('#nb-subject').textContent=next.subject;
   qs('#nb-org').textContent=next.organizer;
   qs('#nb-date').textContent=fmtDate(next.start);
@@ -186,12 +171,13 @@ function renderNext(){
   for(let h=8;h<=17;h++){
     const row=document.createElement('div');row.className='row';
     const t=document.createElement('div');t.className='time';t.textContent=`${zero(h)}:00`;
-    const pill=document.createElement('div');pill.className='pill free';pill.textContent='Free';
+    const p=document.createElement('div');p.className='pill free';p.textContent='Free';
     const hit=today.find(ev=>ev.start.getHours()<h+1&&ev.end.getHours()>h);
-    if(hit){pill.className='pill busy';pill.textContent=`${fmtHM(hit.start)}-${fmtHM(hit.end)} Busy`;}
-    row.append(t,pill);g.append(row);
+    if(hit){p.className='pill busy';p.textContent=`${fmtHM(hit.start)}-${fmtHM(hit.end)} Busy`;}
+    row.append(t,p);g.append(row);
   }
 }
+
 function renderMonth(){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth();
   const first=new Date(y,m,1),last=new Date(y,m+1,0);
@@ -201,13 +187,12 @@ function renderMonth(){
     const c=document.createElement('div');c.className='weekday';c.textContent=d;w.append(c);
   });
   const grid=qs('#monthGrid');grid.innerHTML='';
-  for(let i=0;i<offset;i++){grid.append(Object.assign(document.createElement('div'),{className:'day'}));}
+  for(let i=0;i<offset;i++)grid.append(Object.assign(document.createElement('div'),{className:'day'}));
   for(let d=1;d<=days;d++){
     const cell=document.createElement('div');cell.className='day';
     if(d===now.getDate())cell.classList.add('today');
     const num=document.createElement('div');num.className='num';num.textContent=d;cell.append(num);
-    const key=`${y}-${zero(m+1)}-${zero(d)}`;
-    const evs=dayMap[key]||[];
+    const key=`${y}-${zero(m+1)}-${zero(d)}`,evs=dayMap[key]||[];
     evs.forEach(ev=>{
       const bar=document.createElement('div');bar.className='bar';
       bar.textContent=`${fmtHM(ev.start)}-${fmtHM(ev.end)} Busy`;cell.append(bar);
@@ -216,40 +201,40 @@ function renderMonth(){
     grid.append(cell);
   }
 }
-async function resolveImages(path){
-  const base=path.replace(/\/+$/,'');
-  const names=['1.jpg','2.jpg','3.jpg','1.jpeg','2.jpeg','3.jpeg','1.webp','2.webp','3.webp'];
+
+// image handling (fix relative path)
+async function resolveImages(rel){
+  const base=window.location.pathname.replace(/\/[^/]*$/,'')+'/'+rel.replace(/^\/+/,'');
+  const files=['1.jpg','2.jpg','3.jpg','1.jpeg','2.jpeg','3.jpeg','1.webp','2.webp','3.webp'];
   const found=[];
-  for(const n of names){const url=base+'/'+n;try{const r=await fetch(url,{method:'HEAD'});if(r.ok)found.push(url);}catch{}}
+  for(const f of files){
+    const url=base+'/'+f;
+    try{const r=await fetch(url,{method:'HEAD'});if(r.ok)found.push(url);}catch{}
+  }
   return found;
 }
 async function runImages(){
   const a=qs('#imgA'),b=qs('#imgB');a.classList.remove('show');b.classList.remove('show');
-  if(!imageList.length){a.src='';a.alt='No images';return new Promise(r=>setTimeout(r,1000));}
+  if(!imageList.length){a.removeAttribute('src');a.alt='No images';return new Promise(r=>setTimeout(r,1000));}
   const imgs=imageList;let i=0,showA=true;
-  const swap=()=>{const show=showA?a:b,hide=showA?b:a;hide.classList.remove('show');
-    show.src=imgs[i]+'?t='+Date.now();requestAnimationFrame(()=>show.classList.add('show'));
+  const swap=()=>{const show=showA?a:b,hide=showA?b:a;
+    hide.classList.remove('show');show.src=imgs[i]+'?'+Date.now();requestAnimationFrame(()=>show.classList.add('show'));
     showA=!showA;i=(i+1)%imgs.length;};
-  swap();return new Promise(r=>{
-    let shown=1;const t=setInterval(()=>{swap();shown++;if(shown>=imgs.length){clearInterval(t);setTimeout(r,IMG_S*1000);}},IMG_S*1000);
-  });
+  swap();return new Promise(r=>{let shown=1;const t=setInterval(()=>{swap();shown++;if(shown>=imgs.length){clearInterval(t);setTimeout(r,IMG_S*1000);}},IMG_S*1000);});
 }
+
+// weather
 async function loadWeather(){
   try{
     const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-31.95&longitude=115.86&current_weather=true');
     const j=await r.json();const w=j.current_weather;
-    const t=Math.round(w.temperature);const c=w.weathercode;
-    const i=wxIcon(c);qs('#wxIcon').src=i;qs('#wxText').textContent=`Perth — ${t}°C`;
-  }catch(e){qs('#wxText').textContent='Weather N/A';}
+    const icon=wxIcon(w.weathercode);qs('#wxIcon').src=icon;qs('#wxText').textContent=`Perth — ${Math.round(w.temperature)}°C`;
+  }catch{qs('#wxText').textContent='Weather N/A'}
 }
 function wxIcon(c){
-  if([0].includes(c))return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/clear-day.png';
-  if([1,2].includes(c))return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/partly-cloudy-day.png';
-  if([3].includes(c))return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/cloudy.png';
-  if([45,48].includes(c))return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/fog.png';
-  if([51,53,55,61,63,65,80,81,82].includes(c))return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/rain.png';
-  if([95,96,99].includes(c))return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/thunderstorm.png';
-  return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/unknown.png';
+  const map={0:'clear-day',1:'partly-cloudy-day',2:'partly-cloudy-day',3:'cloudy',45:'fog',48:'fog',51:'rain',61:'rain',63:'rain',80:'rain',95:'thunderstorm'};
+  const n=map[c]||'unknown';
+  return `https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/${n}.png`;
 }
 </script>
 </body>
