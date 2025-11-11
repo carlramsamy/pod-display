@@ -8,8 +8,8 @@
     body {
       margin: 0;
       font-family: "Segoe UI", sans-serif;
-      background: #000;
-      color: #fff;
+      background: #f7f7f7;
+      color: #222;
       overflow: hidden;
     }
 
@@ -29,7 +29,7 @@
     .overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.55);
+      background: rgba(255,255,255,0.6);
       z-index: 1;
     }
 
@@ -68,10 +68,11 @@
       margin-top: 2em;
     }
 
-    .calendar {
-      background: rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 20px;
+    .calendar, .timeline {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 20px 25px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     }
 
     .calendar table {
@@ -81,58 +82,57 @@
 
     .calendar th {
       padding: 8px;
-      color: #ccc;
+      color: #777;
       font-weight: normal;
     }
 
     .calendar td {
       text-align: center;
-      padding: 8px;
+      padding: 10px;
       border-radius: 6px;
       cursor: pointer;
       transition: background 0.3s;
     }
 
-    .calendar td.booked { background: rgba(0,255,0,0.4); }
-    .calendar td.today { border: 1px solid #fff; }
+    .calendar td.booked { background: rgba(0,128,0,0.3); color: #000; font-weight: bold; }
+    .calendar td.today { border: 1px solid #444; }
 
     /* Timeline styling */
     .timeline {
       width: 340px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 20px;
     }
 
     .time-slot {
       display: flex;
       align-items: center;
-      margin: 4px 0;
+      margin: 6px 0;
     }
 
     .time-label {
       width: 60px;
       text-align: right;
       margin-right: 8px;
-      color: #ccc;
+      color: #555;
       font-size: 0.9em;
     }
 
     .time-bar {
       flex: 1;
-      height: 14px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 4px;
+      height: 16px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 6px;
       overflow: hidden;
       position: relative;
     }
 
     .time-fill {
-      background: limegreen;
+      background: linear-gradient(90deg, #34c759, #28a745);
       position: absolute;
       height: 100%;
       top: 0;
       left: 0;
+      width: 0%;
+      transition: width 0.4s ease;
     }
 
     footer {
@@ -140,7 +140,7 @@
       bottom: 20px;
       width: 100%;
       text-align: center;
-      color: #999;
+      color: #777;
       font-size: 0.9em;
     }
   </style>
@@ -191,7 +191,7 @@
       "https://prod-13.australiaeast.logic.azure.com:443/workflows/a6a094d7071142628d6fe9ae820abeb0/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=nrO4sSvqce9x1zUoEDUUWeVFjAbLozbt6WPhZA17FuY" :
       "https://prod-29.australiaeast.logic.azure.com:443/workflows/6921a86944c74a179f6551abb63ae762/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=8CGTf5ohe-BvaGJ436YqtT44nC4d-iw00A8t1mh-5N8";
 
-    // --- Slide control ---
+    // Slide rotation
     const slides = document.querySelectorAll(".slide");
     let current = 0;
     const rotateSlides = () => {
@@ -199,16 +199,16 @@
       current = (current + 1) % slides.length;
       slides[current].classList.add("active");
     };
-    setInterval(rotateSlides, 10000); // 10s per slide
+    setInterval(rotateSlides, 10000);
 
-    // --- Load Images ---
+    // Random pod image
     const podFolder = podName.replace(" ", "");
     const totalImages = 3;
     const imgNum = Math.floor(Math.random() * totalImages) + 1;
     const bgUrl = `Pod-Images/${podFolder}/${imgNum}.jpg`;
     slides.forEach(s => s.style.backgroundImage = `url('${bgUrl}')`);
 
-    // --- Fetch Data ---
+    // Fetch Logic App Data
     fetch(logicAppUrl, { method: "POST" })
       .then(res => res.json())
       .then(data => {
@@ -225,7 +225,7 @@
         renderCalendar(data);
       });
 
-    // --- Render Calendar + Timeline ---
+    // Calendar + Timeline render
     function renderCalendar(events) {
       const calDiv = document.getElementById("calendar");
       const tlDiv = document.getElementById("timeline");
