@@ -8,152 +8,141 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Arial, sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
-      text-align: center;
+      background-color: #f7f7f7;
+      color: #222;
       overflow: hidden;
     }
 
-    .header {
+    header {
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: #ffffff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      padding: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      background-color: #fff;
+      padding: 10px 0;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 5;
     }
 
-    .logo {
-      height: 50px;
-      margin-right: 15px;
+    header img {
+      height: 45px;
+      margin-right: 12px;
     }
 
-    .title {
+    header h1 {
       font-size: 1.8em;
-      font-weight: bold;
       color: #004aad;
+      margin: 0;
     }
 
     .content {
       position: relative;
-      height: calc(100vh - 80px);
+      height: calc(100vh - 70px);
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
     }
 
-    .background {
+    .bg {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      opacity: 0.2;
-      z-index: 1;
+      opacity: 0.25;
+      z-index: 0;
+      transition: opacity 1s ease-in-out;
     }
 
-    .info-box {
+    .overlay {
       position: relative;
       z-index: 2;
       background: rgba(255, 255, 255, 0.85);
       border-radius: 16px;
-      padding: 25px 40px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      width: 70%;
-      max-width: 900px;
-    }
-
-    .info-box h2 {
-      margin-top: 0;
-      color: #004aad;
-    }
-
-    #calendar-container {
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 25px;
-    }
-
-    .calendar {
-      border-collapse: collapse;
-      width: 400px;
-      background: white;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .calendar th {
-      background: #004aad;
-      color: white;
-      padding: 8px;
-    }
-
-    .calendar td {
-      border: 1px solid #ddd;
-      padding: 8px;
+      padding: 30px 50px;
       text-align: center;
-      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      width: 70%;
+      max-width: 1000px;
     }
 
-    .calendar td.booked {
-      background-color: #6dc36d;
-      color: white;
-      font-weight: bold;
+    .overlay h2 {
+      color: #004aad;
+      margin-bottom: 10px;
+    }
+
+    .next-booking {
+      font-size: 1.1em;
+      margin-bottom: 25px;
+      color: #333;
     }
 
     .time-grid {
-      width: 220px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      padding: 10px;
+      display: grid;
+      grid-template-columns: 100px 1fr;
+      gap: 8px 0;
+      text-align: left;
+      max-width: 400px;
+      margin: 0 auto;
+      font-size: 1.1em;
     }
 
     .time-slot {
-      border-bottom: 1px solid #eee;
-      padding: 6px;
-      font-size: 14px;
-      text-align: left;
+      display: contents;
     }
 
-    .booked-slot {
-      background-color: #ffb3b3;
+    .time {
+      padding: 6px;
+      font-weight: 600;
+      color: #004aad;
+    }
+
+    .status {
+      background: #e6e6e6;
+      border-radius: 4px;
+      padding: 6px;
+      margin-bottom: 2px;
+      transition: background 0.3s;
+    }
+
+    .status.busy {
+      background: #ff7b7b;
+      color: white;
+      font-weight: 600;
+    }
+
+    .status.free {
+      background: #7ed957;
       color: #000;
     }
 
     footer {
       position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
+      bottom: 8px;
+      width: 100%;
+      text-align: center;
       font-size: 12px;
       color: #888;
+      z-index: 5;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img src="./assets/TraccLogo1.png" alt="Tracc Logo" class="logo" />
-    <div class="title" id="podName">Loading...</div>
-  </div>
+  <header>
+    <img src="./assets/TraccLogo1.png" alt="Tracc Logo" />
+    <h1 id="podName">Loading...</h1>
+  </header>
 
   <div class="content">
-    <img id="backgroundImage" class="background" src="" alt="Background" />
-    <div class="info-box">
-      <h2 id="nextBookingTitle">Next Booking</h2>
-      <p id="nextBookingDetails">Fetching booking data...</p>
-      <div id="calendar-container">
-        <table class="calendar" id="calendar"></table>
-        <div class="time-grid" id="timeGrid"></div>
-      </div>
+    <img id="bg1" class="bg" src="" alt="background1">
+    <img id="bg2" class="bg" src="" alt="background2" style="opacity:0;">
+    <div class="overlay">
+      <h2>Next Booking</h2>
+      <div class="next-booking" id="nextBooking">Loading booking data...</div>
+      <h2>Today's Schedule</h2>
+      <div class="time-grid" id="timeGrid"></div>
     </div>
   </div>
 
@@ -167,64 +156,70 @@
       ferns: {
         name: "Ferns Pool",
         url: "https://prod-24.australiaeast.logic.azure.com:443/workflows/892f1a4dde764f609db25d146d30241d/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=KZmLYv6oUmBry5KzqE5Rftqw0mENlHO2bdksGfNhGpI",
-        images: "./Pod-Images/FernsPool/",
+        folder: "./Pod-Images/FernsPool/"
       },
       lucky: {
         name: "Lucky Bay",
         url: "https://prod-29.australiaeast.logic.azure.com:443/workflows/6921a86944c74a179f6551abb63ae762/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=8CGTf5ohe-BvaGJ436YqtT44nC4d-iw00A8t1mh-5N8",
-        images: "./Pod-Images/LuckyBay/",
+        folder: "./Pod-Images/LuckyBay/"
       },
       rock: {
         name: "Elephant Rocks",
         url: "https://prod-13.australiaeast.logic.azure.com:443/workflows/a6a094d7071142628d6fe9ae820abeb0/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=nrO4sSvqce9x1zUoEDUUWeVFjAbLozbt6WPhZA17FuY",
-        images: "./Pod-Images/ElephantRocks/",
-      },
+        folder: "./Pod-Images/ElephantRocks/"
+      }
     };
 
-    const pod =
-      podConfig[podParam] ||
-      podConfig["ferns"] ||
-      podConfig["lucky"] ||
-      podConfig["rock"];
+    const pod = podConfig[podParam] || podConfig.ferns;
+    document.getElementById("podName").textContent = pod.name;
 
-    document.getElementById("podName").innerText = pod.name;
+    // ---- BACKGROUND IMAGE ROTATION ----
+    const bg1 = document.getElementById("bg1");
+    const bg2 = document.getElementById("bg2");
+    const imgs = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"];
+    let current = 0;
+    let showingBg1 = true;
 
-    const images = ["1.jpg", "2.jpg", "3.jpg"];
-    let imgIndex = 0;
-    const bgImage = document.getElementById("backgroundImage");
-
-    function rotateImages() {
-      bgImage.src = `${pod.images}${images[imgIndex]}`;
-      imgIndex = (imgIndex + 1) % images.length;
+    function rotateBg() {
+      const nextImg = pod.folder + imgs[current % imgs.length];
+      if (showingBg1) {
+        bg2.src = nextImg;
+        bg2.style.opacity = 1;
+        bg1.style.opacity = 0;
+      } else {
+        bg1.src = nextImg;
+        bg1.style.opacity = 1;
+        bg2.style.opacity = 0;
+      }
+      showingBg1 = !showingBg1;
+      current++;
     }
-    rotateImages();
-    setInterval(rotateImages, 8000);
+    bg1.src = pod.folder + imgs[0];
+    setInterval(rotateBg, 8000);
 
+    // ---- FETCH BOOKINGS ----
     async function fetchBookings() {
       try {
-        const response = await fetch(pod.url, {
+        const res = await fetch(pod.url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: "{}",
+          body: "{}"
         });
-        const data = await response.json();
-        displayNextBooking(data);
-        renderCalendar(data);
+        const data = await res.json();
+        displayNext(data);
+        renderGrid(data);
       } catch (e) {
-        document.getElementById("nextBookingDetails").innerText =
-          "Error loading booking data.";
+        document.getElementById("nextBooking").textContent = "Error loading data.";
       }
     }
 
-    function displayNextBooking(data) {
+    function displayNext(data) {
       if (!data || data.length === 0) {
-        document.getElementById("nextBookingDetails").innerText =
-          "No upcoming bookings found.";
+        document.getElementById("nextBooking").textContent = "No upcoming bookings found.";
         return;
       }
-
       const next = data[0];
-      document.getElementById("nextBookingDetails").innerHTML = `
+      document.getElementById("nextBooking").innerHTML = `
         <strong>${next.subject}</strong><br>
         Organizer: ${next.organizer}<br>
         Date: ${next.start.split(" ")[0]}<br>
@@ -233,48 +228,21 @@
       `;
     }
 
-    function renderCalendar(data) {
-      const calendar = document.getElementById("calendar");
-      const timeGrid = document.getElementById("timeGrid");
-
+    function renderGrid(data) {
+      const grid = document.getElementById("timeGrid");
+      const hours = Array.from({ length: 10 }, (_, i) => 8 + i);
       const today = new Date();
-      const year = today.getFullYear();
-      const month = today.getMonth();
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
+      const todayStr = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear()}`;
 
-      let html = "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr><tr>";
-      for (let i = 0; i < firstDay.getDay(); i++) html += "<td></td>";
-
-      for (let d = 1; d <= lastDay.getDate(); d++) {
-        const date = `${String(d).padStart(2, "0")}/${String(
-          month + 1
-        ).padStart(2, "0")}/${year}`;
-        const isBooked = data.some((b) => b.start.includes(date));
-        html += `<td class="${isBooked ? "booked" : ""}" data-date="${date}">${d}</td>`;
-        if (new Date(year, month, d).getDay() === 6) html += "</tr><tr>";
-      }
-      html += "</tr>";
-      calendar.innerHTML = html;
-
-      const timeSlots = Array.from({ length: 10 }, (_, i) => `${8 + i}:00`);
-      calendar.querySelectorAll("td.booked").forEach((cell) => {
-        cell.addEventListener("click", () => {
-          const date = cell.getAttribute("data-date");
-          const booked = data.filter((b) => b.start.includes(date));
-          timeGrid.innerHTML = `<h4>${date}</h4>` +
-            timeSlots
-              .map(
-                (t) =>
-                  `<div class="time-slot ${
-                    booked.some((b) => b.start.includes(t))
-                      ? "booked-slot"
-                      : ""
-                  }">${t}</div>`
-              )
-              .join("");
-        });
-      });
+      grid.innerHTML = hours.map(h => {
+        const hourStr = String(h).padStart(2, "0") + ":00";
+        const booked = data.find(b => b.start.includes(todayStr) && b.start.includes(hourStr));
+        return `
+          <div class="time-slot">
+            <div class="time">${hourStr}</div>
+            <div class="status ${booked ? "busy" : "free"}">${booked ? "Busy (" + booked.subject + ")" : "Free"}</div>
+          </div>`;
+      }).join("");
     }
 
     fetchBookings();
