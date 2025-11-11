@@ -1,241 +1,342 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light only">
-<title>Tracc Civil | Pod Display</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pod Display</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Luxon for reliable timezone handling -->
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
 <style>
-html,body{margin:0;height:100%;background:#fff;color:#1e1f24;
-  font:400 18px/1.5 "Segoe UI",Roboto,Inter,Helvetica,Arial;}
-body{display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
-header{display:flex;justify-content:space-between;align-items:center;
-  width:100%;max-width:1800px;padding:20px 40px 10px 40px;background:#fff;box-sizing:border-box;}
-header img{height:60px}
-header h1{font-size:30px;margin:0;color:#0b2746;font-weight:800}
-header .weather{display:flex;align-items:center;gap:8px;font-weight:600;color:#5a5f6d}
-header .weather img{width:36px;height:36px}
-main{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
-.card{background:#fff;border-radius:20px;box-shadow:0 8px 25px rgba(0,0,0,.1);
-  padding:30px 36px;margin:auto;max-width:1200px;width:90%;box-sizing:border-box;
-  transform-origin:top center;}
-@media (max-height:950px){.card{transform:scale(.9)}}
-.slide{display:none;opacity:0;transition:opacity .7s ease}
-.slide.active{display:block;opacity:1}
+  :root{
+    --fg:#111;
+    --muted:#666;
+    --accent:#137cbd;
+    --chip:#22a34a;
+    --bg:#fff;           /* force light */
+    --card:#f6f7f8;
+    --shadow:0 10px 30px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .app{height:100vh;width:100vw;overflow:hidden;position:relative}
 
-/* next booking */
-.next{ text-align:center;}
-.kv{display:inline-grid;grid-template-columns:150px auto;gap:8px 14px;text-align:left;margin:16px auto 26px}
-.kv .k{color:#5a5f6d;text-align:right;font-weight:600}
-.schedule .row{display:flex;align-items:center;justify-content:center;gap:10px;margin:5px 0}
-.time{width:70px;font-weight:700;color:#5a5f6d;text-align:right}
-.pill{flex:0 1 240px;padding:8px 12px;border-radius:10px;text-align:center;font-weight:700}
-.free{background:#eef1f6;border:1px dashed #ccd1dc;color:#7a8499}
-.busy{background:#c9eed6;border:1px solid #84d59c;color:#166b3f}
+  /* header */
+  .brand{
+    position:fixed;left:24px;top:18px;display:flex;align-items:center;gap:12px;z-index:3
+  }
+  .brand img{height:32px;width:auto}
+  .brand .title{font-weight:700;font-size:22px;letter-spacing:.2px}
 
-/* month view */
-.month{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.weekday{font-weight:700;color:#5a5f6d;text-align:center}
-.day{min-height:88px;border:1px solid #e8ebf1;border-radius:10px;position:relative}
-.day.today{outline:2px solid #0b5fff}
-.num{position:absolute;top:4px;right:6px;font-weight:700;color:#9aa3b2}
-.bar{margin-top:22px;background:#22a559;color:#fff;font-size:12px;border-radius:6px;
-  padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.empty{color:#ccc;text-align:center;font-size:12px;margin-top:30px}
+  /* slide framework */
+  .slide{
+    position:absolute;inset:0;display:none;padding:84px 48px 48px 48px;
+  }
+  .slide.active{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:.02}to{opacity:1}}
 
-/* images */
-.img-stage{height:70vh;display:flex;align-items:center;justify-content:center;
-  overflow:hidden;border-radius:16px;background:#000}
-.img-stage img{max-width:100%;max-height:100%;object-fit:cover;position:absolute;opacity:0;transition:opacity 1s}
-.img-stage img.show{opacity:1}
-footer{font-size:14px;color:#999;margin-bottom:10px}
+  /* image slides */
+  .imageWrap{height:100%;display:grid;place-items:center}
+  .imageCard{
+    max-width:88vw;max-height:82vh;border-radius:22px;overflow:hidden;
+    box-shadow:var(--shadow);background:#fff;display:flex;align-items:center;justify-content:center
+  }
+  .imageCard img{display:block;max-width:100%;max-height:100%;object-fit:cover}
+
+  .imageTitle{
+    position:absolute;top:70px;left:0;right:0;text-align:center;font-weight:700;font-size:46px;
+  }
+
+  /* next booking */
+  .nextWrap{
+    height:100%;display:flex;align-items:center;justify-content:center
+  }
+  .nextCard{
+    width:min(860px,92vw);padding:36px;border-radius:20px;background:var(--card);box-shadow:var(--shadow);
+    text-align:center
+  }
+  .nb-title{font-size:28px;font-weight:700;margin:0 0 14px}
+  .nb-name{font-size:22px;font-weight:700;margin:6px 0}
+  .nb-line{margin:2px 0;font-size:19px;color:var(--muted)}
+  .nb-when{font-size:22px;margin-top:12px}
+  .chip{
+    display:inline-block;background:var(--chip);color:#fff;border-radius:999px;padding:6px 12px;font-size:14px;margin-top:10px
+  }
+
+  /* calendar slide */
+  .calShell{
+    height:100%;display:flex;align-items:center;justify-content:center
+  }
+  .calCard{
+    width:min(1200px,96vw);height:min(790px,78vh); /* fit 1080p without cut */
+    background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:22px 22px 10px 22px;display:flex;flex-direction:column
+  }
+  .calHead{display:flex;align-items:baseline;justify-content:space-between;padding:0 8px 12px}
+  .calTitle{font-size:28px;font-weight:700}
+  .calMonth{color:var(--muted)}
+  .grid{
+    flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr;gap:10px;min-height:0
+  }
+  .cell{
+    background:#fff;border-radius:14px;padding:8px;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:0
+  }
+  .dayNum{color:var(--muted);font-size:14px;font-weight:600}
+  .today{outline:2px solid var(--accent)}
+  .pill{
+    margin-top:6px;border-radius:10px;background:rgba(34,163,74,.15);
+    color:#1a7c3a;font-size:12px;line-height:1.25;padding:6px 8px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden
+  }
+
+  /* footer watermark */
+  .wm{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
-<header>
-  <div style="display:flex;align-items:center;gap:16px;">
-    <img src="assets/TraccLogo1.png" alt="TRACC Civil">
-    <h1 id="podTitle">Pod</h1>
+<div class="app" id="app">
+  <div class="brand" id="brand">
+    <img src="assets/TraccLogo1.png" alt="TRACC CIVIL">
+    <div class="title" id="brandTitle">Loading…</div>
   </div>
-  <div class="weather" id="weather"><img id="wxIcon"><span id="wxText"></span></div>
-</header>
 
-<main>
-  <section class="slide active" id="slide-next">
-    <div class="card next">
-      <h2>Next Booking</h2>
-      <div id="noNext" style="display:none;color:#777">No upcoming bookings</div>
-      <div id="nextBox">
-        <div class="kv">
-          <div class="k">Subject</div><div id="nb-subject">–</div>
-          <div class="k">Organizer</div><div id="nb-org">–</div>
-          <div class="k">Date</div><div id="nb-date">–</div>
-          <div class="k">Time</div><div id="nb-time">–</div>
-          <div class="k">Location</div><div id="nb-loc">–</div>
-        </div>
-        <h3>Today's Schedule</h3>
-        <div id="todayGrid" class="schedule"></div>
+  <!-- Slide 1 – image 01 -->
+  <section class="slide" id="slide-img-1">
+    <div class="imageTitle" id="imgTitle1"></div>
+    <div class="imageWrap">
+      <div class="imageCard">
+        <img id="img1" alt="Pod image 01">
       </div>
     </div>
   </section>
 
-  <section class="slide" id="slide-month">
-    <div class="card">
-      <h2 style="text-align:center;margin-top:0">Monthly View</h2>
-      <div style="text-align:center;margin-bottom:10px" id="monthLabel"></div>
-      <div class="month" id="weekdayRow"></div>
-      <div class="month" id="monthGrid"></div>
+  <!-- Slide 2 – next booking -->
+  <section class="slide" id="slide-next">
+    <div class="nextWrap">
+      <div class="nextCard">
+        <div class="nb-title">Next Booking</div>
+        <div class="nb-name" id="nbName">—</div>
+        <div class="nb-line"  id="nbOrg">—</div>
+        <div class="nb-when" id="nbWhen">—</div>
+        <div class="nb-line"  id="nbLoc">—</div>
+        <div class="chip" id="nbChip" style="display:none;">Busy</div>
+      </div>
     </div>
   </section>
 
-  <section class="slide" id="slide-images">
-    <div class="card">
-      <h2 style="text-align:center">Gallery</h2>
-      <div class="img-stage"><img id="imgA"><img id="imgB"></div>
+  <!-- Slide 3 – image 02 -->
+  <section class="slide" id="slide-img-2">
+    <div class="imageTitle" id="imgTitle2"></div>
+    <div class="imageWrap"><div class="imageCard"><img id="img2" alt="Pod image 02"></div></div>
+  </section>
+
+  <!-- Slide 4 – month calendar -->
+  <section class="slide" id="slide-cal">
+    <div class="calShell">
+      <div class="calCard">
+        <div class="calHead">
+          <div>
+            <div class="calTitle">Monthly View</div>
+            <div class="calMonth" id="calMonth">—</div>
+          </div>
+        </div>
+        <div class="grid" id="grid">
+          <!-- Cells injected -->
+        </div>
+      </div>
     </div>
   </section>
-</main>
-<footer>© Tracc Civil | Pod Display System</footer>
+
+  <!-- Slide 5 – image 03 -->
+  <section class="slide" id="slide-img-3">
+    <div class="imageTitle" id="imgTitle3"></div>
+    <div class="imageWrap"><div class="imageCard"><img id="img3" alt="Pod image 03"></div></div>
+  </section>
+
+  <div class="wm">© Tracc Civil | Pod Display System</div>
+</div>
 
 <script>
-const qs=s=>document.querySelector(s),qsa=s=>[...document.querySelectorAll(s)];
-const fmtHM=d=>d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
-const fmtDate=d=>d.toLocaleDateString('en-AU',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
-const zero=n=>(n<10?'0':'')+n;
+/* ------------ config & helpers ------------- */
+const { DateTime } = luxon;
+const PERTH = 'Australia/Perth';          // Force AWST
+const DURATIONS = [10000, 15000, 15000, 15000, 10000]; // s1..s5
 
-// parse "DD/MM/YYYY HH:mm" -> Date adjusted to Perth local if needed
-function parseTime(str){
-  const m=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
-  if(!m)return null;
-  const [_,d,mo,y,h,mi]=m.map(Number);
-  const raw=new Date(Date.UTC(y,mo-1,d,h,mi));
-  const diff=(new Date()).getTimezoneOffset();
-  const local=new Date(raw.getTime()-diff*60000);
-  // detect if API times already local
-  const delta=Math.abs(local.getHours()-h);
-  if(delta>8)return new Date(raw.getTime()+8*3600000);
-  return local;
+const qs = new URLSearchParams(location.search);
+const podKey = (qs.get('pod') || 'FernsPool').replace(/\s+/g,''); // default
+
+async function getSettings(){
+  const res = await fetch('config/settings.json?ts=' + Date.now());
+  if(!res.ok) throw new Error('settings.json not found');
+  return res.json();
 }
 
-const urlParams=new URLSearchParams(location.search);
-const podParam=(urlParams.get('pod')||'FernsPool').trim();
+function ensureTrailingSlash(p){ return /\/$/.test(p) ? p : p + '/'; }
 
-let bookings=[],dayMap={},imageList=[],slideIndex=0;
-const SLIDE_MS_NEXT=15000,SLIDE_MS_MONTH=15000,IMG_S=10;
+function parseUtcToPerth(dateStr){
+  // Logic App returns "DD/MM/YYYY HH:mm" in UTC
+  // Be tolerant of single-digit day/month too
+  const dt = DateTime.fromFormat(dateStr, 'd/L/yyyy HH:mm', { zone: 'utc' });
+  return dt.setZone(PERTH);
+}
 
+function fmtRangePerth(startStr,endStr){
+  const s = parseUtcToPerth(startStr);
+  const e = parseUtcToPerth(endStr);
+  return {
+    s, e,
+    dateLabel: s.toFormat('ccc d LLL yyyy'),
+    timeLabel: `${s.toFormat('HH:mm')} – ${e.toFormat('HH:mm')}`
+  };
+}
+
+/* ------------ renderers ------------- */
+function setBrand(podName){
+  document.getElementById('brandTitle').textContent = podName;
+}
+
+function setImageSlides(basePath, podName){
+  const img1 = basePath + '01.jpg';
+  const img2 = basePath + '02.jpg';
+  const img3 = basePath + '03.jpg';
+  document.getElementById('img1').src = img1;
+  document.getElementById('img2').src = img2;
+  document.getElementById('img3').src = img3;
+  document.getElementById('imgTitle1').textContent = podName;
+  document.getElementById('imgTitle2').textContent = podName;
+  document.getElementById('imgTitle3').textContent = podName;
+}
+
+function renderNextBooking(events, displayName){
+  const nbName = document.getElementById('nbName');
+  const nbOrg  = document.getElementById('nbOrg');
+  const nbWhen = document.getElementById('nbWhen');
+  const nbLoc  = document.getElementById('nbLoc');
+  const nbChip = document.getElementById('nbChip');
+
+  if(!events || !events.length){
+    nbName.textContent = 'No upcoming bookings';
+    nbOrg.textContent = '';
+    nbWhen.textContent = '';
+    nbLoc.textContent  = displayName;
+    nbChip.style.display = 'none';
+    return;
+  }
+  // assume events already sorted by start
+  const ev = events[0];
+  const rng = fmtRangePerth(ev.start, ev.end);
+
+  nbName.textContent = (ev.organizer || ev.subject || 'Booked');
+  nbOrg.textContent  = ev.organizer ? `Organizer: ${ev.organizer}` : (ev.subject || '');
+  nbWhen.textContent = `${rng.dateLabel} — ${rng.timeLabel}`;
+  nbLoc.textContent  = `Location: ${displayName}`;
+  nbChip.style.display = 'inline-block';
+}
+
+function renderMonthCalendar(events){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  // Work with current month in Perth
+  const nowPerth = DateTime.now().setZone(PERTH);
+  const first = nowPerth.startOf('month');
+  const last  = nowPerth.endOf('month');
+  const startWeekday = first.weekday % 7; // 1..7 -> 1..0
+  const days = last.day;
+
+  document.getElementById('calMonth').textContent = nowPerth.toFormat('LLLL yyyy');
+
+  // Create 6x7 grid (always safe)
+  const totalCells = 42;
+  for(let i=0;i<totalCells;i++){
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const dayNum = i - startWeekday + 1;
+    if(dayNum>=1 && dayNum<=days){
+      const dn = document.createElement('div');
+      dn.className = 'dayNum';
+      dn.textContent = dayNum;
+      cell.appendChild(dn);
+
+      const dStart = first.set({ day: dayNum }).startOf('day');
+      const dEnd   = dStart.endOf('day');
+
+      // add event pills for this date (in Perth)
+      (events||[]).forEach(ev=>{
+        const s = parseUtcToPerth(ev.start);
+        const e = parseUtcToPerth(ev.end);
+        if( (s >= dStart && s <= dEnd) || (e >= dStart && e <= dEnd) ){
+          const pill = document.createElement('div');
+          pill.className = 'pill';
+          pill.textContent = `${s.toFormat('HH:mm')} – ${e.toFormat('HH:mm')}  Busy`;
+          cell.appendChild(pill);
+        }
+      });
+
+      if(dayNum === nowPerth.day) cell.classList.add('today');
+    }
+    grid.appendChild(cell);
+  }
+}
+
+/* ------------ slideshow ------------- */
+const slides = [
+  'slide-img-1',
+  'slide-next',
+  'slide-img-2',
+  'slide-cal',
+  'slide-img-3'
+];
+let slideIndex = 0, timerId=null;
+
+function show(i){
+  document.querySelectorAll('.slide').forEach(el=>el.classList.remove('active'));
+  document.getElementById(slides[i]).classList.add('active');
+}
+
+function startLoop(){
+  show(slideIndex);
+  timerId = setTimeout(()=>{
+    slideIndex = (slideIndex + 1) % slides.length;
+    startLoop();
+  }, DURATIONS[slideIndex]);
+}
+
+/* ------------ bootstrap ------------- */
 (async()=>{
-  loadWeather();
-  const cfg=await fetch('config/settings.json?cb='+Date.now()).then(r=>r.json());
-  const podCfg=cfg.pods[podParam];
-  qs('#podTitle').textContent=podCfg.displayName||podParam;
-
-  const res=await fetch(podCfg.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
-    .then(r=>r.json()).catch(()=>[]);
-  bookings=(res||[]).map(b=>({subject:b.subject||'',organizer:b.organizer||'',
-    location:b.location||podCfg.displayName,start:parseTime(b.start),end:parseTime(b.end)}))
-    .filter(v=>v.start&&v.end).sort((a,b)=>a.start-b.start);
-  group();
-  renderNext();renderMonth();
-  imageList=await resolveImages(podCfg.imagesPath);
-  runSlides();
-})();
-
-function group(){
-  dayMap={};
-  for(const e of bookings){
-    const k=`${e.start.getFullYear()}-${zero(e.start.getMonth()+1)}-${zero(e.start.getDate())}`;
-    (dayMap[k]??=[]).push(e);
-  }
-}
-function showSlide(id){qsa('.slide').forEach(s=>s.classList.remove('active'));qs(id).classList.add('active');}
-function runSlides(){slideIndex=0;cycle();}
-function cycle(){
-  if(slideIndex===0){showSlide('#slide-next');renderNext();setTimeout(()=>{slideIndex=1;cycle();},SLIDE_MS_NEXT);}
-  else if(slideIndex===1){showSlide('#slide-month');renderMonth();setTimeout(()=>{slideIndex=2;cycle();},SLIDE_MS_MONTH);}
-  else{showSlide('#slide-images');runImages().then(()=>{slideIndex=0;cycle();});}
-}
-
-function renderNext(){
-  const now=new Date();
-  const next=bookings.find(b=>b.end>now);
-  if(!next){qs('#noNext').style.display='block';qs('#nextBox').style.display='none';return;}
-  qs('#noNext').style.display='none';qs('#nextBox').style.display='block';
-  qs('#nb-subject').textContent=next.subject;
-  qs('#nb-org').textContent=next.organizer;
-  qs('#nb-date').textContent=fmtDate(next.start);
-  qs('#nb-time').textContent=`${fmtHM(next.start)} - ${fmtHM(next.end)}`;
-  qs('#nb-loc').textContent=next.location;
-  const g=qs('#todayGrid');g.innerHTML='';
-  const k=`${now.getFullYear()}-${zero(now.getMonth()+1)}-${zero(now.getDate())}`;
-  const today=dayMap[k]||[];
-  for(let h=8;h<=17;h++){
-    const row=document.createElement('div');row.className='row';
-    const t=document.createElement('div');t.className='time';t.textContent=`${zero(h)}:00`;
-    const p=document.createElement('div');p.className='pill free';p.textContent='Free';
-    const hit=today.find(ev=>ev.start.getHours()<h+1&&ev.end.getHours()>h);
-    if(hit){p.className='pill busy';p.textContent=`${fmtHM(hit.start)}-${fmtHM(hit.end)} Busy`;}
-    row.append(t,p);g.append(row);
-  }
-}
-
-function renderMonth(){
-  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
-  const first=new Date(y,m,1),last=new Date(y,m+1,0);
-  const offset=first.getDay(),days=last.getDate();
-  qs('#monthLabel').textContent=now.toLocaleDateString('en-AU',{month:'long',year:'numeric'});
-  const w=qs('#weekdayRow');w.innerHTML='';['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=>{
-    const c=document.createElement('div');c.className='weekday';c.textContent=d;w.append(c);
-  });
-  const grid=qs('#monthGrid');grid.innerHTML='';
-  for(let i=0;i<offset;i++)grid.append(Object.assign(document.createElement('div'),{className:'day'}));
-  for(let d=1;d<=days;d++){
-    const cell=document.createElement('div');cell.className='day';
-    if(d===now.getDate())cell.classList.add('today');
-    const num=document.createElement('div');num.className='num';num.textContent=d;cell.append(num);
-    const key=`${y}-${zero(m+1)}-${zero(d)}`,evs=dayMap[key]||[];
-    evs.forEach(ev=>{
-      const bar=document.createElement('div');bar.className='bar';
-      bar.textContent=`${fmtHM(ev.start)}-${fmtHM(ev.end)} Busy`;cell.append(bar);
-    });
-    if(!evs.length){const e=document.createElement('div');e.className='empty';cell.append(e);}
-    grid.append(cell);
-  }
-}
-
-// image handling (fix relative path)
-async function resolveImages(rel){
-  const base=window.location.pathname.replace(/\/[^/]*$/,'')+'/'+rel.replace(/^\/+/,'');
-  const files=['1.jpg','2.jpg','3.jpg','1.jpeg','2.jpeg','3.jpeg','1.webp','2.webp','3.webp'];
-  const found=[];
-  for(const f of files){
-    const url=base+'/'+f;
-    try{const r=await fetch(url,{method:'HEAD'});if(r.ok)found.push(url);}catch{}
-  }
-  return found;
-}
-async function runImages(){
-  const a=qs('#imgA'),b=qs('#imgB');a.classList.remove('show');b.classList.remove('show');
-  if(!imageList.length){a.removeAttribute('src');a.alt='No images';return new Promise(r=>setTimeout(r,1000));}
-  const imgs=imageList;let i=0,showA=true;
-  const swap=()=>{const show=showA?a:b,hide=showA?b:a;
-    hide.classList.remove('show');show.src=imgs[i]+'?'+Date.now();requestAnimationFrame(()=>show.classList.add('show'));
-    showA=!showA;i=(i+1)%imgs.length;};
-  swap();return new Promise(r=>{let shown=1;const t=setInterval(()=>{swap();shown++;if(shown>=imgs.length){clearInterval(t);setTimeout(r,IMG_S*1000);}},IMG_S*1000);});
-}
-
-// weather
-async function loadWeather(){
   try{
-    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=-31.95&longitude=115.86&current_weather=true');
-    const j=await r.json();const w=j.current_weather;
-    const icon=wxIcon(w.weathercode);qs('#wxIcon').src=icon;qs('#wxText').textContent=`Perth — ${Math.round(w.temperature)}°C`;
-  }catch{qs('#wxText').textContent='Weather N/A'}
-}
-function wxIcon(c){
-  const map={0:'clear-day',1:'partly-cloudy-day',2:'partly-cloudy-day',3:'cloudy',45:'fog',48:'fog',51:'rain',61:'rain',63:'rain',80:'rain',95:'thunderstorm'};
-  const n=map[c]||'unknown';
-  return `https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/${n}.png`;
-}
+    const settings = await getSettings();
+    const pod = settings.pods[podKey] || Object.values(settings.pods)[0];
+    const podName = pod.displayName || podKey;
+    setBrand(podName);
+    const imagesBase = ensureTrailingSlash(pod.imagesPath);
+    setImageSlides(imagesBase, podName);
+
+    // fetch events
+    const res = await fetch(pod.endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
+    const raw = await res.json(); // array
+    // Normalize + sort by start (UTC strings)
+    const events = (Array.isArray(raw)? raw: [])
+      .map(x=>({
+        subject: x.subject || '',
+        organizer: x.organizer || '',
+        start: x.start, end: x.end, location: x.location || ''
+      }))
+      .sort((a,b)=>{
+        const da = DateTime.fromFormat(a.start,'d/L/yyyy HH:mm',{zone:'utc'});
+        const db = DateTime.fromFormat(b.start,'d/L/yyyy HH:mm',{zone:'utc'});
+        return da - db;
+      });
+
+    renderNextBooking(events, podName);
+    renderMonthCalendar(events);
+
+    // Kick slideshow
+    startLoop();
+  }catch(e){
+    console.error(e);
+    document.getElementById('brandTitle').textContent = 'Load error';
+  }
+})();
 </script>
 </body>
 </html>
