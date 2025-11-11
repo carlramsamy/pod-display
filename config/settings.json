@@ -1,6 +1,19 @@
 {
-  "imageDuration": 10,
-  "calendarDuration": 20,
-  "nextBookingDuration": 10,
-  "idleTimeout": 120
+  "pods": {
+    "FernsPool": {
+      "displayName": "Ferns Pool",
+      "endpoint": "https://prod-24.australiaeast.logic.azure.com:443/workflows/892f1a4dde764f609db25d146d30241d/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=KZmLYv6oUmBry5KzqE5Rftqw0mENlHO2bdksGfNhGpI",
+      "imagesPath": "Pod-Images/FernsPool/"
+    },
+    "ElephantRocks": {
+      "displayName": "Elephant Rocks",
+      "endpoint": "https://prod-13.australiaeast.logic.azure.com:443/workflows/a6a094d7071142628d6fe9ae820abeb0/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=nrO4sSvqce9x1zUoEDUUWeVFjAbLozbt6WPhZA17FuY",
+      "imagesPath": "Pod-Images/ElephantRocks/"
+    },
+    "LuckyBay": {
+      "displayName": "Lucky Bay",
+      "endpoint": "https://prod-29.australiaeast.logic.azure.com:443/workflows/6921a86944c74a179f6551abb63ae762/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=8CGTf5ohe-BvaGJ436YqtT44nC4d-iw00A8t1mh-5N8",
+      "imagesPath": "Pod-Images/LuckyBay/"
+    }
+  }
 }
