@@ -3,291 +3,282 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tracc Pod Display</title>
+  <title>Pod Display</title>
   <style>
     body {
       margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background: #f7f7f7;
-      color: #222;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      text-align: center;
       overflow: hidden;
     }
 
-    .slide {
-      display: none;
-      align-items: center;
+    .header {
+      display: flex;
       justify-content: center;
-      height: 100vh;
-      text-align: center;
-      background-size: cover;
-      background-position: center;
-      position: relative;
+      align-items: center;
+      background-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    .active { display: flex; }
+    .logo {
+      height: 50px;
+      margin-right: 15px;
+    }
 
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.6);
-      z-index: 1;
+    .title {
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #004aad;
     }
 
     .content {
       position: relative;
-      z-index: 2;
-    }
-
-    .logo {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 140px;
-      opacity: 0.8;
-      z-index: 3;
-    }
-
-    h1 {
-      font-size: 3em;
-      margin-bottom: 0.2em;
-    }
-
-    p {
-      font-size: 1.3em;
-      margin: 0.4em 0;
-    }
-
-    /* Calendar + Timeline layout */
-    .calendar-container {
+      height: calc(100vh - 80px);
       display: flex;
-      flex-direction: row;
-      align-items: flex-start;
       justify-content: center;
-      gap: 60px;
-      width: 90%;
-      margin-top: 2em;
+      align-items: center;
+      overflow: hidden;
     }
 
-    .calendar, .timeline {
-      background: rgba(255,255,255,0.95);
+    .background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.2;
+      z-index: 1;
+    }
+
+    .info-box {
+      position: relative;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.85);
       border-radius: 16px;
-      padding: 20px 25px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 25px 40px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      width: 70%;
+      max-width: 900px;
     }
 
-    .calendar table {
+    .info-box h2 {
+      margin-top: 0;
+      color: #004aad;
+    }
+
+    #calendar-container {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 25px;
+    }
+
+    .calendar {
       border-collapse: collapse;
-      width: 320px;
+      width: 400px;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
     }
 
     .calendar th {
+      background: #004aad;
+      color: white;
       padding: 8px;
-      color: #777;
-      font-weight: normal;
     }
 
     .calendar td {
+      border: 1px solid #ddd;
+      padding: 8px;
       text-align: center;
-      padding: 10px;
-      border-radius: 6px;
       cursor: pointer;
-      transition: background 0.3s;
     }
 
-    .calendar td.booked { background: rgba(0,128,0,0.3); color: #000; font-weight: bold; }
-    .calendar td.today { border: 1px solid #444; }
+    .calendar td.booked {
+      background-color: #6dc36d;
+      color: white;
+      font-weight: bold;
+    }
 
-    /* Timeline styling */
-    .timeline {
-      width: 340px;
+    .time-grid {
+      width: 220px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      padding: 10px;
     }
 
     .time-slot {
-      display: flex;
-      align-items: center;
-      margin: 6px 0;
+      border-bottom: 1px solid #eee;
+      padding: 6px;
+      font-size: 14px;
+      text-align: left;
     }
 
-    .time-label {
-      width: 60px;
-      text-align: right;
-      margin-right: 8px;
-      color: #555;
-      font-size: 0.9em;
-    }
-
-    .time-bar {
-      flex: 1;
-      height: 16px;
-      background: rgba(0,0,0,0.05);
-      border-radius: 6px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .time-fill {
-      background: linear-gradient(90deg, #34c759, #28a745);
-      position: absolute;
-      height: 100%;
-      top: 0;
-      left: 0;
-      width: 0%;
-      transition: width 0.4s ease;
+    .booked-slot {
+      background-color: #ffb3b3;
+      color: #000;
     }
 
     footer {
-      position: absolute;
-      bottom: 20px;
-      width: 100%;
-      text-align: center;
-      color: #777;
-      font-size: 0.9em;
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #888;
     }
   </style>
 </head>
 <body>
-  <img class="logo" src="assets/TraccLogo1.png" alt="Tracc Civil Logo" />
-
-  <!-- Slide 1: Random Image -->
-  <div id="slide1" class="slide active">
-    <div class="overlay"></div>
-    <div class="content">
-      <h1 id="podName">Pod Display</h1>
-    </div>
+  <div class="header">
+    <img src="./assets/TraccLogo1.png" alt="Tracc Logo" class="logo" />
+    <div class="title" id="podName">Loading...</div>
   </div>
 
-  <!-- Slide 2: Upcoming Booking -->
-  <div id="slide2" class="slide">
-    <div class="overlay"></div>
-    <div class="content">
-      <h1>Up Next</h1>
-      <p id="upNext"></p>
-    </div>
-  </div>
-
-  <!-- Slide 3: Calendar + Timeline -->
-  <div id="slide3" class="slide">
-    <div class="overlay"></div>
-    <div class="content">
-      <h1>Monthly View</h1>
-      <div class="calendar-container">
-        <div class="calendar" id="calendar"></div>
-        <div class="timeline" id="timeline"></div>
+  <div class="content">
+    <img id="backgroundImage" class="background" src="" alt="Background" />
+    <div class="info-box">
+      <h2 id="nextBookingTitle">Next Booking</h2>
+      <p id="nextBookingDetails">Fetching booking data...</p>
+      <div id="calendar-container">
+        <table class="calendar" id="calendar"></table>
+        <div class="time-grid" id="timeGrid"></div>
       </div>
     </div>
   </div>
 
-  <footer>Tracc Civil © 2025</footer>
+  <footer>© Tracc Civil | Pod Display System</footer>
 
   <script>
-    const podName = window.location.hostname.includes("ferns") ? "Ferns Pool"
-                    : window.location.hostname.includes("rock") ? "Elephant Rocks"
-                    : "Lucky Bay";
-    document.getElementById("podName").textContent = podName;
+    const params = new URLSearchParams(window.location.search);
+    const podParam = (params.get("pod") || "").toLowerCase();
 
-    const logicAppUrl = window.location.hostname.includes("ferns") ?
-      "https://prod-24.australiaeast.logic.azure.com:443/workflows/892f1a4dde764f609db25d146d30241d/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=KZmLYv6oUmBry5KzqE5Rftqw0mENlHO2bdksGfNhGpI" :
-      window.location.hostname.includes("rock") ?
-      "https://prod-13.australiaeast.logic.azure.com:443/workflows/a6a094d7071142628d6fe9ae820abeb0/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=nrO4sSvqce9x1zUoEDUUWeVFjAbLozbt6WPhZA17FuY" :
-      "https://prod-29.australiaeast.logic.azure.com:443/workflows/6921a86944c74a179f6551abb63ae762/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=8CGTf5ohe-BvaGJ436YqtT44nC4d-iw00A8t1mh-5N8";
-
-    // Slide rotation
-    const slides = document.querySelectorAll(".slide");
-    let current = 0;
-    const rotateSlides = () => {
-      slides[current].classList.remove("active");
-      current = (current + 1) % slides.length;
-      slides[current].classList.add("active");
+    const podConfig = {
+      ferns: {
+        name: "Ferns Pool",
+        url: "https://prod-24.australiaeast.logic.azure.com:443/workflows/892f1a4dde764f609db25d146d30241d/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=KZmLYv6oUmBry5KzqE5Rftqw0mENlHO2bdksGfNhGpI",
+        images: "./Pod-Images/FernsPool/",
+      },
+      lucky: {
+        name: "Lucky Bay",
+        url: "https://prod-29.australiaeast.logic.azure.com:443/workflows/6921a86944c74a179f6551abb63ae762/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=8CGTf5ohe-BvaGJ436YqtT44nC4d-iw00A8t1mh-5N8",
+        images: "./Pod-Images/LuckyBay/",
+      },
+      rock: {
+        name: "Elephant Rocks",
+        url: "https://prod-13.australiaeast.logic.azure.com:443/workflows/a6a094d7071142628d6fe9ae820abeb0/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=nrO4sSvqce9x1zUoEDUUWeVFjAbLozbt6WPhZA17FuY",
+        images: "./Pod-Images/ElephantRocks/",
+      },
     };
-    setInterval(rotateSlides, 10000);
 
-    // Random pod image
-    const podFolder = podName.replace(" ", "");
-    const totalImages = 3;
-    const imgNum = Math.floor(Math.random() * totalImages) + 1;
-    const bgUrl = `Pod-Images/${podFolder}/${imgNum}.jpg`;
-    slides.forEach(s => s.style.backgroundImage = `url('${bgUrl}')`);
+    const pod =
+      podConfig[podParam] ||
+      podConfig["ferns"] ||
+      podConfig["lucky"] ||
+      podConfig["rock"];
 
-    // Fetch Logic App Data
-    fetch(logicAppUrl, { method: "POST" })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.length) return;
+    document.getElementById("podName").innerText = pod.name;
 
-        // Up next
-        const next = data[0];
-        const options = { timeZone: "Australia/Perth", hour: '2-digit', minute: '2-digit' };
-        const start = new Date(next.start);
-        const end = new Date(next.end);
-        document.getElementById("upNext").innerHTML =
-          `<strong>${next.subject}</strong><br>${next.organizer}<br>${start.toLocaleString('en-AU', options)} - ${end.toLocaleString('en-AU', options)}<br>${next.location}`;
+    const images = ["1.jpg", "2.jpg", "3.jpg"];
+    let imgIndex = 0;
+    const bgImage = document.getElementById("backgroundImage");
 
-        renderCalendar(data);
-      });
-
-    // Calendar + Timeline render
-    function renderCalendar(events) {
-      const calDiv = document.getElementById("calendar");
-      const tlDiv = document.getElementById("timeline");
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-      const bookedDays = {};
-      events.forEach(ev => {
-        const d = new Date(ev.start);
-        if (!bookedDays[d.getDate()]) bookedDays[d.getDate()] = [];
-        bookedDays[d.getDate()].push(ev);
-      });
-
-      // Build calendar
-      let html = "<table><tr>";
-      const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-      days.forEach(d => html += `<th>${d}</th>`);
-      html += "</tr><tr>";
-      for (let i = 0; i < firstDay; i++) html += "<td></td>";
-      for (let d = 1; d <= daysInMonth; d++) {
-        const classes = [];
-        if (bookedDays[d]) classes.push("booked");
-        if (d === now.getDate()) classes.push("today");
-        html += `<td class="${classes.join(" ")}" data-day="${d}">${d}</td>`;
-        if ((d + firstDay) % 7 === 0) html += "</tr><tr>";
-      }
-      html += "</tr></table>";
-      calDiv.innerHTML = html;
-
-      const allCells = calDiv.querySelectorAll("td[data-day]");
-      allCells.forEach(td => td.addEventListener("click", e => {
-        const day = +e.target.dataset.day;
-        renderTimeline(bookedDays[day] || []);
-      }));
-
-      renderTimeline(bookedDays[now.getDate()] || []);
+    function rotateImages() {
+      bgImage.src = `${pod.images}${images[imgIndex]}`;
+      imgIndex = (imgIndex + 1) % images.length;
     }
+    rotateImages();
+    setInterval(rotateImages, 8000);
 
-    function renderTimeline(dayEvents) {
-      const tlDiv = document.getElementById("timeline");
-      const startHour = 8, endHour = 17;
-      let html = "";
-
-      for (let h = startHour; h <= endHour; h++) {
-        const label = `${h.toString().padStart(2,"0")}:00`;
-        const slotEvents = dayEvents.filter(ev => {
-          const s = new Date(ev.start).getHours();
-          const e = new Date(ev.end).getHours();
-          return h >= s && h < e;
+    async function fetchBookings() {
+      try {
+        const response = await fetch(pod.url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}",
         });
-        const fillPercent = slotEvents.length ? 100 : 0;
-        html += `
-          <div class="time-slot">
-            <div class="time-label">${label}</div>
-            <div class="time-bar"><div class="time-fill" style="width:${fillPercent}%;"></div></div>
-          </div>`;
+        const data = await response.json();
+        displayNextBooking(data);
+        renderCalendar(data);
+      } catch (e) {
+        document.getElementById("nextBookingDetails").innerText =
+          "Error loading booking data.";
       }
-      tlDiv.innerHTML = html;
     }
+
+    function displayNextBooking(data) {
+      if (!data || data.length === 0) {
+        document.getElementById("nextBookingDetails").innerText =
+          "No upcoming bookings found.";
+        return;
+      }
+
+      const next = data[0];
+      document.getElementById("nextBookingDetails").innerHTML = `
+        <strong>${next.subject}</strong><br>
+        Organizer: ${next.organizer}<br>
+        Date: ${next.start.split(" ")[0]}<br>
+        Time: ${next.start.split(" ")[1]} - ${next.end.split(" ")[1]}<br>
+        Location: ${next.location}
+      `;
+    }
+
+    function renderCalendar(data) {
+      const calendar = document.getElementById("calendar");
+      const timeGrid = document.getElementById("timeGrid");
+
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+
+      let html = "<tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr><tr>";
+      for (let i = 0; i < firstDay.getDay(); i++) html += "<td></td>";
+
+      for (let d = 1; d <= lastDay.getDate(); d++) {
+        const date = `${String(d).padStart(2, "0")}/${String(
+          month + 1
+        ).padStart(2, "0")}/${year}`;
+        const isBooked = data.some((b) => b.start.includes(date));
+        html += `<td class="${isBooked ? "booked" : ""}" data-date="${date}">${d}</td>`;
+        if (new Date(year, month, d).getDay() === 6) html += "</tr><tr>";
+      }
+      html += "</tr>";
+      calendar.innerHTML = html;
+
+      const timeSlots = Array.from({ length: 10 }, (_, i) => `${8 + i}:00`);
+      calendar.querySelectorAll("td.booked").forEach((cell) => {
+        cell.addEventListener("click", () => {
+          const date = cell.getAttribute("data-date");
+          const booked = data.filter((b) => b.start.includes(date));
+          timeGrid.innerHTML = `<h4>${date}</h4>` +
+            timeSlots
+              .map(
+                (t) =>
+                  `<div class="time-slot ${
+                    booked.some((b) => b.start.includes(t))
+                      ? "booked-slot"
+                      : ""
+                  }">${t}</div>`
+              )
+              .join("");
+        });
+      });
+    }
+
+    fetchBookings();
+    setInterval(fetchBookings, 5 * 60 * 1000);
   </script>
 </body>
 </html>
