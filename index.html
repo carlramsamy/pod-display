@@ -1,252 +1,493 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pod Display</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tracc Civil | Pod Display</title>
   <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background-color: #f7f7f7;
-      color: #222;
-      overflow: hidden;
+    :root{
+      --bg:#f7f7f7;
+      --card:#ffffff;
+      --ink:#1e1f24;
+      --muted:#5a5f6d;
+      --accent:#0b5fff;
+      --busy:#22a559;
+      --free:#e9edf4;
+      --pill:#e8f5ee;
+      --shadow:0 10px 30px rgba(40,44,63,.08);
+      --radius:18px;
+      --brand:#0b2746;
     }
-
-    header {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #fff;
-      padding: 10px 0;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      position: relative;
-      z-index: 5;
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.45 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial;}
+    .wrap{min-height:100%;display:flex;flex-direction:column}
+    header{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:22px 34px;border-bottom:1px solid #eceff3;background:#fff;position:sticky;top:0;z-index:5
     }
+    header .left{display:flex;gap:14px;align-items:center}
+    header img.logo{height:34px}
+    header .title{font-weight:800;font-size:28px;letter-spacing:.2px;color:var(--brand)}
+    header .weather{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--muted)}
+    header .weather img{width:26px;height:26px;object-fit:contain}
 
-    header img {
-      height: 45px;
-      margin-right: 12px;
+    main{flex:1;display:flex;align-items:center;justify-content:center;padding:26px}
+    .card{
+      width:min(1180px,92vw);background:var(--card);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:34px 36px;margin:auto
     }
+    h2{margin:0 0 20px 0;font-size:28px}
+    .subtle{color:var(--muted)}
+    .grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:26px}
+    .panel{background:#fff;border:1px solid #eef1f6;border-radius:16px;padding:18px 18px 6px 18px}
 
-    header h1 {
-      font-size: 1.8em;
-      color: #004aad;
-      margin: 0;
+    /* Slide visibility */
+    .slide{display:none}
+    .slide.active{display:block}
+
+    /* Up Next layout */
+    .next-head{display:flex;flex-direction:column;align-items:center;margin-bottom:10px}
+    .kv{display:grid;grid-template-columns:120px 1fr;gap:6px 16px;margin:8px auto 24px;max-width:640px}
+    .kv .k{color:var(--muted);text-align:right}
+    .schedule .row{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:10px;margin-bottom:8px;background:#f7f9fc}
+    .schedule .time{width:72px;font-weight:700;color:var(--muted)}
+    .pill{flex:1;padding:10px 12px;border-radius:10px;font-weight:700;text-align:center}
+    .busy{background:var(--pill);color:#167a46;border:1px solid #bfe7cf}
+    .free{background:var(--free);color:#7a8499;border:1px dashed #d7dde8}
+
+    /* Month grid */
+    .month-wrap{display:grid;grid-template-columns:1fr;gap:16px}
+    .month{
+      display:grid;grid-template-columns:repeat(7,1fr);gap:8px;user-select:none
     }
-
-    .content {
-      position: relative;
-      height: calc(100vh - 70px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
+    .weekday{color:var(--muted);text-align:center;font-weight:700}
+    .day{
+      min-height:96px;background:#fff;border:1px solid #eef1f6;border-radius:12px;padding:6px 6px 8px 6px;position:relative
     }
-
-    .bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.25;
-      z-index: 0;
-      transition: opacity 1s ease-in-out;
+    .day .num{position:absolute;top:6px;right:8px;font-weight:800;color:#9aa3b2}
+    .day.today{outline:2px solid var(--accent)}
+    .bar{
+      margin-top:22px;display:block;border-radius:8px;padding:2px 6px;
+      background:var(--busy);color:#fff;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
     }
+    .empty-note{color:var(--muted);font-weight:600}
 
-    .overlay {
-      position: relative;
-      z-index: 2;
-      background: rgba(255, 255, 255, 0.85);
-      border-radius: 16px;
-      padding: 30px 50px;
-      text-align: center;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      width: 70%;
-      max-width: 1000px;
+    /* Image slide */
+    .img-stage{height:64vh;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:16px;border:1px solid #eef1f6}
+    .img-stage img{
+      max-height:100%;max-width:100%;object-fit:cover;border-radius:12px;box-shadow:var(--shadow);opacity:0;transition:opacity 800ms ease
     }
+    .img-stage img.show{opacity:1}
 
-    .overlay h2 {
-      color: #004aad;
-      margin-bottom: 10px;
-    }
+    footer{padding:14px 26px;color:#9aa3b2;text-align:center;font-size:14px}
 
-    .next-booking {
-      font-size: 1.1em;
-      margin-bottom: 25px;
-      color: #333;
-    }
-
-    .time-grid {
-      display: grid;
-      grid-template-columns: 100px 1fr;
-      gap: 8px 0;
-      text-align: left;
-      max-width: 400px;
-      margin: 0 auto;
-      font-size: 1.1em;
-    }
-
-    .time-slot {
-      display: contents;
-    }
-
-    .time {
-      padding: 6px;
-      font-weight: 600;
-      color: #004aad;
-    }
-
-    .status {
-      background: #e6e6e6;
-      border-radius: 4px;
-      padding: 6px;
-      margin-bottom: 2px;
-      transition: background 0.3s;
-    }
-
-    .status.busy {
-      background: #ff7b7b;
-      color: white;
-      font-weight: 600;
-    }
-
-    .status.free {
-      background: #7ed957;
-      color: #000;
-    }
-
-    footer {
-      position: fixed;
-      bottom: 8px;
-      width: 100%;
-      text-align: center;
-      font-size: 12px;
-      color: #888;
-      z-index: 5;
+    /* Big screen tweaks */
+    @media (min-width:1500px){
+      .kv{max-width:760px}
+      .day{min-height:110px}
+      .img-stage{height:68vh}
     }
   </style>
 </head>
 <body>
+<div class="wrap">
   <header>
-    <img src="./assets/TraccLogo1.png" alt="Tracc Logo" />
-    <h1 id="podName">Loading...</h1>
+    <div class="left">
+      <img class="logo" src="assets/TraccLogo1.png" alt="TRACC CIVIL">
+      <div class="title" id="podTitle">Pod</div>
+    </div>
+    <div class="weather" id="weather">
+      <img alt="" id="wxIcon" />
+      <span id="wxText">Perth — …</span>
+    </div>
   </header>
 
-  <div class="content">
-    <img id="bg1" class="bg" src="" alt="background1">
-    <img id="bg2" class="bg" src="" alt="background2" style="opacity:0;">
-    <div class="overlay">
-      <h2>Next Booking</h2>
-      <div class="next-booking" id="nextBooking">Loading booking data...</div>
-      <h2>Today's Schedule</h2>
-      <div class="time-grid" id="timeGrid"></div>
-    </div>
-  </div>
+  <main>
+    <!-- SLIDE 1: NEXT BOOKING -->
+    <section class="slide active" id="slide-next">
+      <div class="card">
+        <div class="next-head">
+          <h2>Next Booking</h2>
+          <div class="subtle" id="nextFallback" style="display:none">No upcoming bookings.</div>
+        </div>
+
+        <div id="nextDetail">
+          <div class="kv">
+            <div class="k">Subject</div><div class="v" id="nb-subject">—</div>
+            <div class="k">Organizer</div><div class="v" id="nb-org">—</div>
+            <div class="k">Date</div><div class="v" id="nb-date">—</div>
+            <div class="k">Time</div><div class="v" id="nb-time">—</div>
+            <div class="k">Location</div><div class="v" id="nb-loc">—</div>
+          </div>
+
+          <div class="panel schedule">
+            <h3 style="margin:0 0 12px 6px;">Today's Schedule</h3>
+            <div id="todayGrid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: MONTH VIEW -->
+    <section class="slide" id="slide-month">
+      <div class="card">
+        <h2 style="margin-bottom:10px">Monthly View</h2>
+        <div class="subtle" id="monthLabel" style="margin-bottom:16px">—</div>
+        <div class="month-wrap">
+          <div class="month" id="weekdayRow"></div>
+          <div class="month" id="monthGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: IMAGE LOOP -->
+    <section class="slide" id="slide-images">
+      <div class="card">
+        <h2 style="margin-bottom:14px">Gallery</h2>
+        <div class="img-stage">
+          <img id="imgA" alt="">
+          <img id="imgB" alt="">
+        </div>
+      </div>
+    </section>
+  </main>
 
   <footer>© Tracc Civil | Pod Display System</footer>
+</div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const podParam = (params.get("pod") || "").toLowerCase();
+<script>
+/* -------------------- UTILITIES -------------------- */
+const qs = (s, d=document)=>d.querySelector(s);
+const qsa = (s, d=document)=>[...d.querySelectorAll(s)];
+const fmtHM = d => d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+const fmtDate = d => d.toLocaleDateString([], {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
+const zero = n => (n<10?'0':'')+n;
 
-    const podConfig = {
-      ferns: {
-        name: "Ferns Pool",
-        url: "https://prod-24.australiaeast.logic.azure.com:443/workflows/892f1a4dde764f609db25d146d30241d/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=KZmLYv6oUmBry5KzqE5Rftqw0mENlHO2bdksGfNhGpI",
-        folder: "./Pod-Images/FernsPool/"
-      },
-      lucky: {
-        name: "Lucky Bay",
-        url: "https://prod-29.australiaeast.logic.azure.com:443/workflows/6921a86944c74a179f6551abb63ae762/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=8CGTf5ohe-BvaGJ436YqtT44nC4d-iw00A8t1mh-5N8",
-        folder: "./Pod-Images/LuckyBay/"
-      },
-      rock: {
-        name: "Elephant Rocks",
-        url: "https://prod-13.australiaeast.logic.azure.com:443/workflows/a6a094d7071142628d6fe9ae820abeb0/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=nrO4sSvqce9x1zUoEDUUWeVFjAbLozbt6WPhZA17FuY",
-        folder: "./Pod-Images/ElephantRocks/"
-      }
-    };
+/** Parse "DD/MM/YYYY HH:mm" to local Date */
+function parseAU(str){
+  // "12/11/2025 02:30"
+  const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+  if(!m) return null;
+  const [_, d, mo, y, h, mi] = m.map(Number);
+  return new Date(y, mo-1, d, h, mi, 0, 0);
+}
 
-    const pod = podConfig[podParam] || podConfig.ferns;
-    document.getElementById("podName").textContent = pod.name;
+/** Group events by YYYY-MM-DD */
+function groupByDay(events){
+  const map = {};
+  for(const e of events){
+    const k = `${e.start.getFullYear()}-${zero(e.start.getMonth()+1)}-${zero(e.start.getDate())}`;
+    (map[k] ||= []).push(e);
+  }
+  // sort per day by start time
+  Object.values(map).forEach(list=>list.sort((a,b)=>a.start-b.start));
+  return map;
+}
 
-    // ---- BACKGROUND IMAGE ROTATION ----
-    const bg1 = document.getElementById("bg1");
-    const bg2 = document.getElementById("bg2");
-    const imgs = ["1.jpg", "2.jpg", "3.jpg", "4.jpg"];
-    let current = 0;
-    let showingBg1 = true;
+/* -------------------- CONFIG / POD -------------------- */
+const urlParams = new URLSearchParams(location.search);
+const podParam = (urlParams.get('pod') || 'FernsPool').trim();
+const SLIDE_MS_NEXT = 15000;
+const SLIDE_MS_MONTH = 15000;
+const IMAGE_SECONDS = 10; // per image
+let podCfg = null;
+let bookings = [];
+let dayMap = {};
+let slideIndex = 0;
+let imageTimer = null;
+let imageList = [];
+let imageCursor = 0;
 
-    function rotateBg() {
-      const nextImg = pod.folder + imgs[current % imgs.length];
-      if (showingBg1) {
-        bg2.src = nextImg;
-        bg2.style.opacity = 1;
-        bg1.style.opacity = 0;
-      } else {
-        bg1.src = nextImg;
-        bg1.style.opacity = 1;
-        bg2.style.opacity = 0;
-      }
-      showingBg1 = !showingBg1;
-      current++;
+const weekdayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+(async function boot(){
+  // Weather first (non-blocking)
+  loadPerthWeather().catch(()=>{});
+
+  // Load settings.json
+  const settings = await fetch('config/settings.json?cb='+Date.now()).then(r=>r.json());
+  const pods = settings.pods || settings.PODS || {};
+  if(!pods[podParam]){
+    // Try fallback keys: remove spaces / case-insensitive
+    const key = Object.keys(pods).find(k=>k.toLowerCase()===podParam.toLowerCase());
+    podCfg = pods[key];
+  } else {
+    podCfg = pods[podParam];
+  }
+  if(!podCfg){
+    alert('Pod not found in config/settings.json: ' + podParam);
+    return;
+  }
+  // Show pod title nicely
+  const prettyName = toPrettyName(podParam);
+  qs('#podTitle').textContent = prettyName;
+
+  // Fetch bookings
+  const endpoint = podCfg.endpoint || podCfg.url || podCfg.logicApp;
+  if(!endpoint){ alert('No endpoint configured for pod: '+podParam); return; }
+  bookings = await fetch(endpoint, {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'})
+    .then(r=>r.json())
+    .catch(e=>{
+      console.error(e);
+      return [];
+    });
+  // Normalize bookings -> {subject, organizer, location, start:Date, end:Date}
+  bookings = (bookings||[]).map(b=>{
+    const start = parseAU(b.start);
+    const end = parseAU(b.end);
+    return {subject:(b.subject||'').trim(), organizer:(b.organizer||'').trim(), location:(b.location||'').trim(), start, end};
+  }).filter(e=>e.start && e.end);
+
+  // Build structures
+  bookings.sort((a,b)=>a.start-b.start);
+  dayMap = groupByDay(bookings);
+
+  // Render slides initial
+  renderNextSlide();
+  renderMonthSlide();
+
+  // Prepare images
+  imageList = await resolveImagesList(podCfg, podParam);
+  startSlideshowLoop();
+})();
+
+/* -------------------- SLIDE LOOP -------------------- */
+function showSlide(id){
+  qsa('.slide').forEach(s=>s.classList.remove('active'));
+  qs(id).classList.add('active');
+}
+
+function startSlideshowLoop(){
+  // cycle: next (15s) -> month (15s) -> images (10s * N) -> repeat
+  slideIndex = 0;
+  runStep();
+}
+
+function runStep(){
+  if(slideIndex===0){
+    showSlide('#slide-next');
+    renderNextSlide(); // refresh schedule each time
+    setTimeout(()=>{ slideIndex=1; runStep(); }, SLIDE_MS_NEXT);
+  } else if(slideIndex===1){
+    showSlide('#slide-month');
+    renderMonthSlide(); // refresh month each loop
+    setTimeout(()=>{ slideIndex=2; runStep(); }, SLIDE_MS_MONTH);
+  } else {
+    showSlide('#slide-images');
+    startImageCycle().then(()=>{
+      slideIndex=0;
+      runStep();
+    });
+  }
+}
+
+/* -------------------- SLIDE 1: NEXT -------------------- */
+function renderNextSlide(){
+  const now = new Date();
+  const next = bookings.find(b => b.end > now);
+  const nextDetail = qs('#nextDetail');
+  const fallback = qs('#nextFallback');
+  if(!next){
+    nextDetail.style.display='none';
+    fallback.style.display='block';
+    return;
+  }
+  fallback.style.display='none';
+  nextDetail.style.display='block';
+
+  qs('#nb-subject').textContent = next.subject || '—';
+  qs('#nb-org').textContent = next.organizer || '—';
+  qs('#nb-date').textContent = fmtDate(next.start);
+  qs('#nb-time').textContent = `${fmtHM(next.start)} - ${fmtHM(next.end)}`;
+  qs('#nb-loc').textContent = next.location || toPrettyName(podParam);
+
+  // Today's schedule grid 08:00–17:00
+  const grid = qs('#todayGrid');
+  grid.innerHTML='';
+  const todayKey = `${now.getFullYear()}-${zero(now.getMonth()+1)}-${zero(now.getDate())}`;
+  const todays = dayMap[todayKey] || [];
+  // Create hour rows
+  for(let h=8; h<=17; h++){
+    const row = document.createElement('div'); row.className='row';
+    const tm = document.createElement('div'); tm.className='time';
+    tm.textContent = `${zero(h)}:00`;
+    const pill = document.createElement('div'); pill.className='pill free'; pill.textContent='Free';
+    // if any booking overlaps this hour -> Busy with label
+    const hit = todays.find(ev => hourOverlaps(h, ev.start, ev.end));
+    if(hit){
+      pill.className='pill busy';
+      pill.textContent = `${fmtHM(hit.start)} - ${fmtHM(hit.end)}  Busy`;
     }
-    bg1.src = pod.folder + imgs[0];
-    setInterval(rotateBg, 8000);
+    row.append(tm, pill);
+    grid.append(row);
+  }
+}
 
-    // ---- FETCH BOOKINGS ----
-    async function fetchBookings() {
-      try {
-        const res = await fetch(pod.url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: "{}"
-        });
-        const data = await res.json();
-        displayNext(data);
-        renderGrid(data);
-      } catch (e) {
-        document.getElementById("nextBooking").textContent = "Error loading data.";
+function hourOverlaps(hour, start, end){
+  const d = new Date(start); d.setMinutes(0,0,0);
+  const blockStart = new Date(d); blockStart.setHours(hour);
+  const blockEnd = new Date(d); blockEnd.setHours(hour+1);
+  return start < blockEnd && end > blockStart;
+}
+
+/* -------------------- SLIDE 2: MONTH -------------------- */
+function renderMonthSlide(){
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth(); // 0-based
+  const first = new Date(y, m, 1);
+  const last = new Date(y, m+1, 0);
+  const startOffset = first.getDay(); // 0=Sun
+  const daysInMonth = last.getDate();
+
+  qs('#monthLabel').textContent = now.toLocaleDateString([], {month:'long', year:'numeric'});
+
+  // Weekday header
+  const r = qs('#weekdayRow'); r.innerHTML='';
+  weekdayNames.forEach(w=>{
+    const c = document.createElement('div'); c.className='weekday'; c.textContent=w; r.append(c);
+  });
+
+  const grid = qs('#monthGrid'); grid.innerHTML='';
+  // blanks before day 1
+  for(let i=0;i<startOffset;i++){
+    const blank = document.createElement('div'); blank.className='day'; grid.append(blank);
+  }
+  // days
+  for(let day=1; day<=daysInMonth; day++){
+    const cell = document.createElement('div'); cell.className='day';
+    const num = document.createElement('div'); num.className='num'; num.textContent=day; cell.append(num);
+
+    const key = `${y}-${zero(m+1)}-${zero(day)}`;
+    const evs = (dayMap[key] || []);
+    evs.slice(0,3).forEach(ev=>{
+      const bar = document.createElement('span'); bar.className='bar';
+      bar.textContent = `${fmtHM(ev.start)} – ${fmtHM(ev.end)} • Busy`;
+      cell.append(bar);
+    });
+    if(evs.length===0){
+      const small = document.createElement('div'); small.className='empty-note';
+      small.style.margin='28px 0 0 8px';
+      small.textContent='';
+      cell.append(small);
+    }
+    // today highlight
+    if(day===now.getDate()) cell.classList.add('today');
+
+    grid.append(cell);
+  }
+}
+
+/* -------------------- SLIDE 3: IMAGES -------------------- */
+async function resolveImagesList(cfg, podName){
+  // Prefer explicit list from settings.json
+  let base = (cfg.imageFolder || `Pod-Images/${podName}`).replace(/\/+$/,'');
+  let list = (cfg.images || []).map(n => `${base}/${n}`);
+  if(list.length) return list;
+
+  // Fallback guesses (filenames often seen in your repo)
+  const guesses = [
+    '1.jpg','2.jpg','3.jpg',
+    `${podName}1.jpg`,`${podName}2.jpg`,`${podName}3.jpg`,
+    `${podName}1.jpeg`,`${podName}2.jpeg`,`${podName}3.jpeg`,
+    `${podName}1.webp`,`${podName}2.webp`,`${podName}3.webp`
+  ];
+  // Best-effort: try HEAD to see if exists (GitHub Pages allows it)
+  const exists = [];
+  for(const g of guesses){
+    const url = `${base}/${g}`;
+    try{
+      const r = await fetch(url, {method:'HEAD', cache:'no-store'});
+      if(r.ok){ exists.push(url); if(exists.length>=3) break; }
+    }catch(_){}
+  }
+  return exists;
+}
+
+function preload(src){
+  return new Promise(res=>{
+    const i = new Image();
+    i.onload=()=>res(src);
+    i.onerror=()=>res(null);
+    i.src=src+'?cb='+Date.now();
+  });
+}
+
+async function startImageCycle(){
+  if(imageTimer){ clearInterval(imageTimer); imageTimer=null; }
+  const a = qs('#imgA'), b = qs('#imgB');
+  a.classList.remove('show'); b.classList.remove('show');
+  if(!imageList || imageList.length===0){
+    a.alt='No images configured'; a.removeAttribute('src');
+    return new Promise(resolve=>setTimeout(resolve, 1000)); // nothing to show, return quick
+  }
+
+  // Ensure at least 2 preloaded
+  const prepared = [];
+  for(const src of imageList){ const ok = await preload(src); if(ok) prepared.push(ok); }
+  if(prepared.length===0) return;
+  let idx = 0;
+  let showA = true;
+
+  function swap(){
+    const img = showA ? a : b;
+    const hide = showA ? b : a;
+    hide.classList.remove('show');
+    img.src = prepared[idx] + `#t=${Date.now()}`;
+    img.alt = 'Gallery image';
+    requestAnimationFrame(()=>img.classList.add('show'));
+    showA = !showA;
+    idx = (idx+1) % prepared.length;
+  }
+  swap();
+  return new Promise(resolve=>{
+    let shown = 1;
+    imageTimer = setInterval(()=>{
+      swap();
+      shown++;
+      if(shown >= prepared.length){
+        clearInterval(imageTimer); imageTimer=null;
+        setTimeout(resolve, IMAGE_SECONDS*1000); // allow last image to be visible full duration
       }
-    }
+    }, IMAGE_SECONDS*1000);
+  });
+}
 
-    function displayNext(data) {
-      if (!data || data.length === 0) {
-        document.getElementById("nextBooking").textContent = "No upcoming bookings found.";
-        return;
-      }
-      const next = data[0];
-      document.getElementById("nextBooking").innerHTML = `
-        <strong>${next.subject}</strong><br>
-        Organizer: ${next.organizer}<br>
-        Date: ${next.start.split(" ")[0]}<br>
-        Time: ${next.start.split(" ")[1]} - ${next.end.split(" ")[1]}<br>
-        Location: ${next.location}
-      `;
-    }
+/* -------------------- WEATHER (Perth) -------------------- */
+async function loadPerthWeather(){
+  // Open-Meteo: no key, CORS friendly
+  const url = 'https://api.open-meteo.com/v1/forecast?latitude=-31.9523&longitude=115.8613&current=temperature_2m,weather_code';
+  const data = await fetch(url, {cache:'no-store'}).then(r=>r.json());
+  const t = Math.round(data?.current?.temperature_2m ?? NaN);
+  const code = data?.current?.weather_code ?? 0;
+  const icon = wxIconFromCode(code);
+  qs('#wxIcon').src = icon;
+  qs('#wxIcon').alt = 'Weather';
+  qs('#wxText').textContent = `Perth — ${isFinite(t)?t+'°C':'—'}`;
+}
+function wxIconFromCode(c){
+  // lightweight mapping
+  if([0].includes(c)) return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/clear-day.png';
+  if([1,2].includes(c)) return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/partly-cloudy-day.png';
+  if([3].includes(c)) return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/cloudy.png';
+  if([45,48].includes(c)) return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/fog.png';
+  if([51,53,55,61,63,65,80,81,82].includes(c)) return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/rain.png';
+  if([71,73,75,85,86].includes(c)) return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/snow.png';
+  if([95,96,99].includes(c)) return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/thunderstorm.png';
+  return 'https://cdn.jsdelivr.net/gh/hbergren/simple-weather-icons@main/64/unknown.png';
+}
 
-    function renderGrid(data) {
-      const grid = document.getElementById("timeGrid");
-      const hours = Array.from({ length: 10 }, (_, i) => 8 + i);
-      const today = new Date();
-      const todayStr = `${String(today.getDate()).padStart(2,"0")}/${String(today.getMonth()+1).padStart(2,"0")}/${today.getFullYear()}`;
-
-      grid.innerHTML = hours.map(h => {
-        const hourStr = String(h).padStart(2, "0") + ":00";
-        const booked = data.find(b => b.start.includes(todayStr) && b.start.includes(hourStr));
-        return `
-          <div class="time-slot">
-            <div class="time">${hourStr}</div>
-            <div class="status ${booked ? "busy" : "free"}">${booked ? "Busy (" + booked.subject + ")" : "Free"}</div>
-          </div>`;
-      }).join("");
-    }
-
-    fetchBookings();
-    setInterval(fetchBookings, 5 * 60 * 1000);
-  </script>
+/* -------------------- Helpers -------------------- */
+function toPrettyName(s){
+  // Map common pod slugs to nice names
+  const map = {
+    'FernsPool':'Ferns Pool',
+    'LuckyBay':'Lucky Bay',
+    'ElephantRocks':'Elephant Rocks'
+  };
+  return map[s] || s.replace(/([a-z])([A-Z])/g,'$1 $2').replace(/-/g,' ').replace(/\s+/g,' ').trim();
+}
+</script>
 </body>
 </html>
