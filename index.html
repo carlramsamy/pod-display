@@ -1,170 +1,89 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tracc Civil Pod Display</title>
+  <meta charset="utf-8"/>
+  <title>Pod Display</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <style>
-    body {
-      margin: 0;
-      background-color: #ffffff; /* switched to white background */
-      color: #000000; /* black text */
-      font-family: 'Segoe UI', sans-serif;
-      overflow: hidden;
+    body{
+      margin:0; font-family:sans-serif; background:#fff; color:#000;
+      display:flex; align-items:center; justify-content:center;
+      height:100vh; overflow:hidden;
     }
-    .slide {
-      display: none;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      text-align: center;
-    }
-    .slide.active {
-      display: flex;
-    }
-    h1 {
-      color: #FF7900; /* Tracc orange */
-      font-size: 3rem;
-      margin-bottom: 1rem;
-    }
-    h2 {
-      color: #0072BC; /* Tracc blue accent */
-      font-size: 2rem;
-    }
-    .logo {
-      position: absolute;
-      top: 20px;
-      right: 40px;
-      width: 180px;
-      opacity: 0.95;
-      filter: drop-shadow(0 0 8px rgba(0,0,0,0.4));
-      background-color: rgba(255,255,255,0.7);
-      border-radius: 8px;
-      padding: 5px;
-    }
-    img.background {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -1;
-      opacity: 0.9;
-      animation: fadein 2s ease-in;
-    }
-    @keyframes fadein {
-      from { opacity: 0; }
-      to { opacity: 0.9; }
-    }
+    #app{ text-align:center; width:90%; }
+    #logo{ position:absolute; top:20px; right:20px; width:160px; }
+    h1{ font-size:48px; margin:10px 0; }
+    .slide img{ max-width:100%; border-radius:16px; }
+    .card{ background:#f6f7f9; padding:20px; border-radius:16px; display:inline-block; box-shadow:0 6px 20px rgba(0,0,0,.1);}
   </style>
 </head>
 <body>
-  <img src="assets/TraccLogo1.png" alt="Tracc Civil Logo" class="logo">
-
-  <div id="slides-container"></div>
+  <div id="app">
+    <img id="logo" src="assets/TraccLogo1.png" alt="Tracc Logo"/>
+    <h1 id="podName">Loading...</h1>
+    <div id="stage"></div>
+  </div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const pod = urlParams.get('pod') || "ElephantRocks";
+  async function init(){
+    const params = new URLSearchParams(window.location.search);
+    const podName = params.get("pod");
+    const title = document.getElementById("podName");
+    const stage = document.getElementById("stage");
 
-    const mailboxMap = {
-      ElephantRocks: "rockpod@tracccivil.com.au",
-      LuckyBay: "baypod@tracccivil.com.au",
-      FernsPool: "fernspod@tracccivil.com.au"
-    };
+    const res = await fetch("config/settings.json");
+    const cfg = await res.json();
+    const pod = cfg.pods[podName];
 
-    const podImages = {
-      ElephantRocks: [
-        "Pod-Images/ElephantRocks/Elephant Rock1.jpg",
-        "Pod-Images/ElephantRocks/Elephant Rock2.jpeg",
-        "Pod-Images/ElephantRocks/Elephant Rock3.webp"
-      ],
-      LuckyBay: [
-        "Pod-Images/LuckyBay/Lucky Bay1.jpg",
-        "Pod-Images/LuckyBay/Lucky Bay2.webp",
-        "Pod-Images/LuckyBay/lucky-bay3.jpg"
-      ],
-      FernsPool: [
-        "Pod-Images/FernsPool/Ferns pool1.webp",
-        "Pod-Images/FernsPool/Ferns pool2.webp",
-        "Pod-Images/FernsPool/Ferns pool3.jpg"
-      ]
-    };
-
-    const nextBooking = {
-      title: "Team Meeting",
-      time: "2:30 PM"
-    };
-
-    const imageSlideDuration = 10000; // 10 sec
-    const calendarSlideDuration = 20000; // 20 sec
-    const nextBookingDuration = 10000; // 10 sec
-
-    const slides = [];
-
-    slides.push(`
-      <div class="slide">
-        <h1>${pod.replace(/([A-Z])/g, ' $1').trim()} Pod</h1>
-        <h2>${mailboxMap[pod]}</h2>
-      </div>
-    `);
-
-    slides.push(`
-      <div class="slide">
-        <h1>Bookings for ${new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}</h1>
-        <h2>(${pod} monthly calendar)</h2>
-      </div>
-    `);
-
-    slides.push(`
-      <div class="slide">
-        <h1>Next Booking</h1>
-        <h2>${nextBooking.title} – ${nextBooking.time}</h2>
-      </div>
-    `);
-
-    const images = podImages[pod] || [];
-    images.forEach(img => {
-      slides.push(`
-        <div class="slide">
-          <img class="background" src="${img}" alt="${pod}">
-        </div>
-      `);
-    });
-
-    const container = document.getElementById('slides-container');
-    container.innerHTML = slides.join('');
-
-    let current = 0;
-    const allSlides = document.querySelectorAll('.slide');
-
-    function showSlide(index) {
-      allSlides.forEach((slide, i) => {
-        slide.classList.toggle('active', i === index);
-      });
+    if(!pod){
+      title.textContent = "Pod not found";
+      stage.innerHTML = "<p>Use ?pod=FernsPool | ElephantRocks | LuckyBay</p>";
+      return;
     }
 
-    showSlide(current);
+    title.textContent = pod.displayName;
 
-    function nextSlide() {
-      const currentSlide = allSlides[current];
-      const isCalendar = currentSlide.innerHTML.includes('Bookings for');
-      const isNextBooking = currentSlide.innerHTML.includes('Next Booking');
-      let duration = imageSlideDuration;
+    const images = ["01.jpg","02.jpg","03.jpg"].map(i => pod.imagesPath + i);
 
-      if (isCalendar) duration = calendarSlideDuration;
-      else if (isNextBooking) duration = nextBookingDuration;
-
-      setTimeout(() => {
-        current = (current + 1) % allSlides.length;
-        showSlide(current);
-        nextSlide();
-      }, duration);
+    async function getEvents(){
+      try{
+        const r = await fetch(pod.endpoint, {method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"});
+        const d = await r.json();
+        return Array.isArray(d)?d:[];
+      }catch(e){
+        console.log("fetch error",e);
+        return [];
+      }
     }
 
-    nextSlide();
+    function showNext(ev){
+      if(!ev) return "<div class='card'><h2>No upcoming bookings</h2></div>";
+      return `<div class='card'>
+        <h2>Up Next</h2>
+        <p><strong>${ev.subject}</strong></p>
+        <p>${ev.start} - ${ev.end}</p>
+        <p>${ev.location}</p>
+      </div>`;
+    }
+
+    let idx=0; let events=[];
+    async function cycle(){
+      const mode = idx%3;
+      if(mode===0){
+        stage.innerHTML = `<div class='slide'><img src='${images[(idx/3)%images.length]}'></div>`;
+      }else if(mode===1){
+        stage.innerHTML = showNext(events[0]);
+      }else{
+        stage.innerHTML = "<p>Monthly view placeholder (coming next)</p>";
+      }
+      idx++;
+      setTimeout(cycle,10000);
+    }
+
+    events = await getEvents();
+    cycle();
+  }
+  init();
   </script>
 </body>
 </html>
