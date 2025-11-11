@@ -25,65 +25,82 @@
   </div>
 
   <script>
-  async function init(){
-    const params = new URLSearchParams(window.location.search);
-    const podName = params.get("pod");
-    const title = document.getElementById("podName");
-    const stage = document.getElementById("stage");
+async function init(){
+  const params = new URLSearchParams(window.location.search);
+  const podName = params.get("pod");
+  const title = document.getElementById("podName");
+  const stage = document.getElementById("stage");
 
-    const res = await fetch("config/settings.json");
-    const cfg = await res.json();
-    const pod = cfg.pods[podName];
+  const res = await fetch("config/settings.json");
+  const cfg = await res.json();
+  const pod = cfg.pods[podName];
+  if(!pod){ title.textContent="Pod not found"; stage.innerHTML="<p>Use ?pod=FernsPool | ElephantRocks | LuckyBay</p>"; return; }
+  title.textContent = pod.displayName;
 
-    if(!pod){
-      title.textContent = "Pod not found";
-      stage.innerHTML = "<p>Use ?pod=FernsPool | ElephantRocks | LuckyBay</p>";
-      return;
-    }
+  const images=["01.jpg","02.jpg","03.jpg"].map(i=>pod.imagesPath+i);
 
-    title.textContent = pod.displayName;
-
-    const images = ["01.jpg","02.jpg","03.jpg"].map(i => pod.imagesPath + i);
-
-    async function getEvents(){
-      try{
-        const r = await fetch(pod.endpoint, {method:"POST", headers:{"Content-Type":"application/json"}, body:"{}"});
-        const d = await r.json();
-        return Array.isArray(d)?d:[];
-      }catch(e){
-        console.log("fetch error",e);
-        return [];
-      }
-    }
-
-    function showNext(ev){
-      if(!ev) return "<div class='card'><h2>No upcoming bookings</h2></div>";
-      return `<div class='card'>
-        <h2>Up Next</h2>
-        <p><strong>${ev.subject}</strong></p>
-        <p>${ev.start} - ${ev.end}</p>
-        <p>${ev.location}</p>
-      </div>`;
-    }
-
-    let idx=0; let events=[];
-    async function cycle(){
-      const mode = idx%3;
-      if(mode===0){
-        stage.innerHTML = `<div class='slide'><img src='${images[(idx/3)%images.length]}'></div>`;
-      }else if(mode===1){
-        stage.innerHTML = showNext(events[0]);
-      }else{
-        stage.innerHTML = "<p>Monthly view placeholder (coming next)</p>";
-      }
-      idx++;
-      setTimeout(cycle,10000);
-    }
-
-    events = await getEvents();
-    cycle();
+  async function getEvents(){
+    try{
+      const r=await fetch(pod.endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+      const d=await r.json(); return Array.isArray(d)?d:[];
+    }catch(e){return [];}
   }
-  init();
-  </script>
+
+  function watermark(bg,textHTML){
+    const src=images[Math.floor(Math.random()*images.length)];
+    return `<div style="position:relative;display:flex;align-items:center;justify-content:center;">
+      <img src='${src}' style="position:absolute;width:100%;height:100%;object-fit:cover;opacity:.15;filter:blur(2px);">
+      <div style="position:relative;z-index:2;">${textHTML}</div>
+    </div>`;
+  }
+
+  function showNext(ev){
+    if(!ev) return watermark("<div class='card'><h2>No upcoming bookings</h2></div>");
+    const html=`<div class='card'>
+      <h2>Up Next</h2>
+      <p><strong>${ev.subject}</strong></p>
+      <p>${ev.start} - ${ev.end}</p>
+      <p>${ev.location}</p>
+    </div>`;
+    return watermark(html);
+  }
+
+  function showMonth(events){
+    const now=new Date();
+    const year=now.getFullYear(),month=now.getMonth();
+    const first=new Date(year,month,1);
+    const last=new Date(year,month+1,0);
+    const booked=new Set();
+    events.forEach(e=>{
+      const [d,m,y]=e.start.split(" ")[0].split("/").map(Number);
+      if(y===year&&m-1===month) booked.add(d);
+    });
+    let html=`<div class='card'><h2>${now.toLocaleString('en-AU',{month:'long',year:'numeric'})}</h2>`;
+    html+="<div style='display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px'>";
+    const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    days.forEach(d=>html+=`<div><b>${d}</b></div>`);
+    for(let i=0;i<first.getDay();i++) html+="<div></div>";
+    for(let d=1;d<=last.getDate();d++){
+      const mark=booked.has(d)?"background:#2e7d32;color:#fff;border-radius:6px":"";
+      html+=`<div style="padding:10px;${mark}">${d}</div>`;
+    }
+    html+="</div></div>";
+    return html;
+  }
+
+  let idx=0;let events=[];
+  async function cycle(){
+    const mode=idx%3;
+    if(mode===0) stage.innerHTML=`<img src='${images[(idx/3)%images.length]}' style="max-width:90%;border-radius:16px;">`;
+    else if(mode===1) stage.innerHTML=showNext(events[0]);
+    else stage.innerHTML=showMonth(events);
+    idx++; setTimeout(cycle,10000);
+  }
+
+  events=await getEvents();
+  cycle();
+}
+init();
+</script>
 </body>
 </html>
