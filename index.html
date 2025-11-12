@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="color-scheme" content="light only"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Pod Display</title>
 
 <style>
@@ -19,41 +18,38 @@ html, body {
   padding: 0;
   height: 100%;
   background: var(--bg);
-  color: var(--text);
   font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   overflow: hidden;
 }
 
-/* Core layout */
+/* Frame and fade transitions */
 .frame {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   width: 100vw;
   height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: white;
-  box-sizing: border-box;
-  padding: 3vh 3vw; /* white frame effect */
+  position: relative;
+  overflow: hidden;
 }
-
-/* Slides */
 .slide {
   display: none;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;
+  width: 94%;
+  height: 94%;
+  background: white;
+  border-radius: 25px;
   box-shadow: var(--shadow);
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  animation: fadein 1s ease;
 }
 .slide.active {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: fade 1s ease-in-out;
 }
-@keyframes fade {
+@keyframes fadein {
   from { opacity: 0; }
   to { opacity: 1; }
 }
@@ -61,35 +57,34 @@ html, body {
 /* Fixed top-right logo */
 .logoFixed {
   position: absolute;
-  top: 15px;
-  right: 20px;
+  top: 20px;
+  right: 30px;
   z-index: 10;
 }
 .logoFixed img {
-  height: 55px;
+  height: 65px;
   width: auto;
-  object-fit: contain;
 }
 
-/* Hero images */
+/* Hero slides */
 .hero img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 90%;
+  height: auto;
   border-radius: 10px;
+  object-fit: contain;
 }
 .heroTitle {
   position: absolute;
   top: 50%;
   width: 100%;
   text-align: center;
-  font-size: 48px;
-  font-weight: 800;
-  color: #444;
-  text-shadow: 0 2px 8px rgba(255,255,255,0.6);
+  font-size: 52px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
 }
 
-/* Next Booking */
+/* Next Booking Card */
 .card {
   background: white;
   border-radius: 20px;
@@ -99,14 +94,14 @@ html, body {
   max-width: 700px;
 }
 .card h1 {
-  font-size: 42px;
+  font-size: 46px;
   font-weight: 900;
-  margin: 0 0 10px;
+  margin: 0 0 15px;
 }
 .card h2 {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 .card .meta {
   color: var(--muted);
@@ -115,10 +110,10 @@ html, body {
 .card .time {
   font-size: 24px;
   font-weight: 700;
-  margin: 10px 0;
+  margin: 12px 0;
 }
 .card .loc {
-  font-size: 18px;
+  font-size: 20px;
 }
 .card .pill {
   display: inline-block;
@@ -128,6 +123,7 @@ html, body {
   padding: 6px 14px;
   font-weight: 700;
   margin-top: 15px;
+  font-size: 16px;
 }
 
 /* Calendar */
@@ -135,9 +131,9 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 85%;
-  height: 85%;
+  justify-content: flex-start;
+  width: 90%;
+  height: 90%;
   background: white;
   border-radius: 20px;
   box-shadow: var(--shadow);
@@ -152,15 +148,15 @@ html, body {
   margin-bottom: 10px;
 }
 .calendarHeader h1 {
-  font-size: 36px;
+  font-size: 40px;
   font-weight: 900;
   margin: 0;
 }
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: minmax(70px, 1fr);
-  gap: 6px;
+  grid-auto-rows: minmax(80px, 1fr);
+  gap: 8px;
   width: 100%;
   flex-grow: 1;
 }
@@ -178,7 +174,7 @@ html, body {
 }
 .day .num {
   position: absolute;
-  top: 4px;
+  top: 6px;
   right: 8px;
   font-weight: 700;
   color: #aaa;
@@ -189,23 +185,25 @@ html, body {
   background: var(--busy);
   color: white;
   border-radius: 999px;
-  padding: 2px 6px;
+  padding: 3px 6px;
   font-size: 11px;
   font-weight: 700;
   margin-top: 18px;
 }
 .footer {
+  position: absolute;
+  bottom: 8px;
+  width: 100%;
   text-align: center;
   color: #999;
-  font-size: 13px;
-  padding-top: 8px;
+  font-size: 14px;
 }
 </style>
 </head>
 <body>
 
 <div class="frame">
-  <!-- Slides -->
+  <!-- Slide 1: Hero Image 1 -->
   <div class="slide active" id="slide1">
     <div class="logoFixed"><img src="assets/TraccLogo1.png" alt="TRACC Civil"></div>
     <div class="hero">
@@ -214,18 +212,20 @@ html, body {
     </div>
   </div>
 
+  <!-- Slide 2: Next Booking -->
   <div class="slide" id="slide2">
     <div class="logoFixed"><img src="assets/TraccLogo1.png" alt="TRACC Civil"></div>
-    <div class="card">
+    <div class="card" id="nextBookingCard">
       <h1>Next Booking</h1>
-      <h2 id="nbWho">—</h2>
-      <div class="meta" id="nbOrg">—</div>
-      <div class="time" id="nbWhen">—</div>
-      <div class="loc" id="nbWhere">—</div>
-      <div class="pill">Busy</div>
+      <h2 id="nbWho">Loading...</h2>
+      <div class="meta" id="nbOrg"></div>
+      <div class="time" id="nbWhen"></div>
+      <div class="loc" id="nbWhere"></div>
+      <div class="pill" id="nbStatus">Busy</div>
     </div>
   </div>
 
+  <!-- Slide 3: Hero Image 2 -->
   <div class="slide" id="slide3">
     <div class="logoFixed"><img src="assets/TraccLogo1.png" alt="TRACC Civil"></div>
     <div class="hero">
@@ -234,6 +234,7 @@ html, body {
     </div>
   </div>
 
+  <!-- Slide 4: Calendar -->
   <div class="slide" id="slide4">
     <div class="calendarContainer">
       <div class="calendarHeader">
@@ -244,6 +245,7 @@ html, body {
     </div>
   </div>
 
+  <!-- Slide 5: Hero Image 3 -->
   <div class="slide" id="slide5">
     <div class="logoFixed"><img src="assets/TraccLogo1.png" alt="TRACC Civil"></div>
     <div class="hero">
@@ -273,25 +275,21 @@ let slideIdx = 0, timer = null;
 
 function showSlide(i) {
   document.querySelectorAll(".slide").forEach(s => s.classList.remove("active"));
-  const slide = slides[i];
-  qs(slide.id).classList.add("active");
+  qs(slides[i].id).classList.add("active");
   clearTimeout(timer);
   timer = setTimeout(() => {
     slideIdx = (i + 1) % slides.length;
     showSlide(slideIdx);
-  }, slide.dur);
+  }, slides[i].dur);
 }
 
 function fmtDate(d) {
-  return new Intl.DateTimeFormat("en-AU", {
-    timeZone: TZ, month: "long", year: "numeric"
-  }).format(d);
+  return new Intl.DateTimeFormat("en-AU", {timeZone: TZ, month: "long", year: "numeric"}).format(d);
 }
 function fmtTime(d) {
-  return new Intl.DateTimeFormat("en-AU", {
-    timeZone: TZ, hour: "2-digit", minute: "2-digit", hour12: false
-  }).format(d);
+  return new Intl.DateTimeFormat("en-AU", {timeZone: TZ, hour: "2-digit", minute: "2-digit", hour12: false}).format(d);
 }
+function isSameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
 
 async function loadSettings() {
   const r = await fetch(settingsUrl, {cache: "no-store"});
@@ -305,7 +303,7 @@ async function loadSettings() {
 }
 
 async function loadEvents() {
-  const r = await fetch(podCfg.endpoint, {method: "POST", headers: {"Content-Type": "application/json"}, body: "{}", cache: "no-store"});
+  const r = await fetch(podCfg.endpoint, {method:"POST",headers:{"Content-Type":"application/json"},body:"{}",cache:"no-store"});
   const raw = await r.json();
   events = raw.map(e => ({
     title: e.subject || "",
@@ -318,8 +316,16 @@ async function loadEvents() {
 
 function renderNextBooking() {
   const now = new Date();
-  const next = events.find(e => e.end > now);
-  if (!next) return;
+  const today = new Date(now.toLocaleString("en-US",{timeZone:TZ}));
+  const todays = events.filter(e => isSameDay(new Date(e.start), today));
+  const card = qs("nextBookingCard");
+
+  if (todays.length === 0) {
+    card.innerHTML = `<h1>Next Booking</h1><h2>No bookings currently booked for today</h2>`;
+    return;
+  }
+
+  const next = todays[0];
   qs("nbWho").textContent = next.title;
   qs("nbOrg").textContent = `Organizer: ${next.organizer}`;
   qs("nbWhen").textContent = `${fmtDate(next.start)} — ${fmtTime(next.start)}–${fmtTime(next.end)}`;
@@ -330,18 +336,21 @@ function renderCalendar() {
   const cal = qs("calendar");
   cal.innerHTML = "";
   const today = new Date();
-  qs("monthLabel").textContent = fmtDate(today);
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const localNow = new Date(today.toLocaleString("en-US",{timeZone:TZ}));
+  qs("monthLabel").textContent = fmtDate(localNow);
+  const year = localNow.getFullYear();
+  const month = localNow.getMonth();
   const first = new Date(year, month, 1);
   const firstDay = first.getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+
   for (let i = 0; i < firstDay; i++) {
     const blank = document.createElement("div");
     blank.className = "day";
     blank.style.visibility = "hidden";
     cal.appendChild(blank);
   }
+
   for (let d = 1; d <= daysInMonth; d++) {
     const dayEl = document.createElement("div");
     dayEl.className = "day";
@@ -349,15 +358,19 @@ function renderCalendar() {
     num.className = "num";
     num.textContent = d;
     dayEl.appendChild(num);
-    if (d === today.getDate()) dayEl.classList.add("today");
+
+    if (d === localNow.getDate()) dayEl.classList.add("today");
+
     events.forEach(ev => {
-      if (ev.start.getDate() === d && ev.start.getMonth() === month) {
+      const evStart = new Date(ev.start.toLocaleString("en-US",{timeZone:TZ}));
+      if (evStart.getDate() === d && evStart.getMonth() === month) {
         const tag = document.createElement("div");
         tag.className = "tag";
         tag.textContent = `${fmtTime(ev.start)} – ${fmtTime(ev.end)} · Busy`;
         dayEl.appendChild(tag);
       }
     });
+
     cal.appendChild(dayEl);
   }
 }
