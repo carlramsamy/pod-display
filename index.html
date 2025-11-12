@@ -1,224 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pod Display</title>
-  <style>
-    body {
-      margin: 0;
-      background-color: white;
-      overflow: hidden;
-      font-family: "Segoe UI", Arial, sans-serif;
-      color: #222;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pod Display</title>
+<link rel="preload" href="assets/TraccLogo1.png" as="image" />
+<style>
+  :root{
+    --border-radius: 22px;
+    --card-radius: 18px;
+    --shadow: 0 10px 30px rgba(0,0,0,0.12);
+    --shadow-heavy: 0 20px 60px rgba(0,0,0,0.18);
+    --text: #222;
+    --muted: #6b7280;
+    --green: #2e7d32;
+    --bg:#ffffff;
+    --panel:#f7f7f7;
+    --maxw: 1780px;   /* fits 1080p widescreen safely with white border */
+    --content-w: 1620px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+  }
+  .frame{
+    min-height:100vh;
+    padding:18px 18px 26px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .canvas{
+    width:100%; max-width:var(--maxw);
+    border-radius:var(--border-radius);
+    background:var(--panel);
+    box-shadow:var(--shadow-heavy);
+    position:relative; overflow:hidden;
+    padding:22px;     /* white border inside */
+  }
+  /* fixed logo in the white border (never overlaps photo) */
+  .brand{
+    position:absolute; top:22px; right:22px;
+    height:40px; width:auto; object-fit:contain;
+    filter:none;
+  }
 
-    .slide {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      background: white;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
+  /* slide host */
+  .slide{
+    width:100%; height:calc(100vh - 2*18px - 2*22px - 26px);
+    max-height:860px;               /* protect bottom footer */
+    display:flex; align-items:center; justify-content:center;
+  }
+  .photoWrap{
+    width:100%; max-width:var(--content-w);
+    height:100%;
+    border-radius:16px; overflow:hidden;
+    position:relative; box-shadow:var(--shadow);
+    display:flex; align-items:center; justify-content:center;
+    background:#000;
+  }
+  .photo{
+    width:100%; height:100%; object-fit:cover;
+  }
 
-    .active {
-      opacity: 1;
-      z-index: 2;
-    }
+  /* title overlay (top center) */
+  .titleOverlay{
+    position:absolute; top:18px; left:50%; transform:translateX(-50%);
+    color:#fff; font-weight:800; letter-spacing:0.3px;
+    font-size: clamp(28px, 3.7vw, 56px);
+    text-shadow: 0 2px 18px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.6);
+    padding:6px 14px; border-radius:10px;
+    backdrop-filter:saturate(140%) blur(2px);
+  }
 
-    .hero-image {
-      position: relative;
-      width: 95%;
-      height: 85%;
-      object-fit: contain;
-      border-radius: 20px;
-      border: 8px solid white;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-    }
+  /* card overlay for next booking & schedule */
+  .card{
+    position:absolute; inset:auto; 
+    max-width:980px; width:min(92%, 980px);
+    background:rgba(255,255,255,0.92);
+    border-radius:var(--card-radius);
+    box-shadow:var(--shadow-heavy);
+    color:#1f2937;
+  }
+  .card.center{left:50%; top:50%; transform:translate(-50%,-50%);}
+  .card.pad{padding:28px 32px;}
+  .card h2{
+    margin:0 0 12px; font-size: clamp(24px, 3.2vw, 44px); text-align:center;
+  }
+  .meta{ text-align:center; color:#374151; font-size:clamp(16px, 1.4vw, 20px)}
+  .status{
+    display:inline-block; margin-top:14px; padding:8px 14px; border-radius:999px;
+    color:#fff; background:var(--green); font-weight:700; font-size:clamp(14px,1.2vw,18px)
+  }
+  .status.badge{ background:#A3A3A3 }
+  .status.progress{ background:#e11d48 }  /* red for in-progress */
 
-    .pod-name {
-      position: absolute;
-      top: 5%;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      font-size: 3vw;
-      font-weight: bold;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.6);
-    }
+  /* schedule table */
+  .grid{
+    width:100%; border-collapse:collapse; margin-top:6px;
+    font-size:clamp(16px,1.5vw,22px);
+  }
+  .grid th, .grid td{ padding:14px 18px; }
+  .grid tr + tr td{ border-top:1px solid rgba(0,0,0,0.08) }
+  .grid .time{ color:#111; font-weight:700; width:38% }
+  .grid .who.free{ color:var(--muted) }
+  .grid .who.busy{ color:#0f5132; font-weight:700 }
+  .grid .who.progress{ color:#b91c1c; font-weight:800 }
 
-    .logo {
-      position: absolute;
-      top: 3%;
-      right: 3%;
-      width: 150px;
-      opacity: 0.95;
-    }
-
-    footer {
-      position: absolute;
-      bottom: 2%;
-      width: 100%;
-      text-align: center;
-      font-size: 1.2vw;
-      color: #444;
-    }
-
-    /* Booking overlay slide */
-    .overlay-container {
-      position: relative;
-      width: 95%;
-      height: 85%;
-      border-radius: 20px;
-      overflow: hidden;
-      border: 8px solid white;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-    }
-
-    .overlay-bg {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: brightness(60%);
-    }
-
-    .overlay-box {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 65%;
-      background: rgba(255,255,255,0.85);
-      padding: 20px 30px;
-      border-radius: 15px;
-      text-align: left;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    }
-
-    .overlay-box h2 {
-      text-align: center;
-      margin-top: 0;
-      color: #222;
-      font-size: 2vw;
-    }
-
-    .booking-grid {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 1.4vw;
-    }
-
-    .booking-grid th, .booking-grid td {
-      padding: 6px 10px;
-      border-bottom: 1px solid #ccc;
-    }
-
-    .free { background: transparent; }
-    .booked { background: #ffdddd; }
-    .inprogress { background: #d5fdd5; }
-    .completed { background: #e0e0e0; }
-  </style>
+  /* footer */
+  .footer{
+    position:absolute; left:0; right:0; bottom:10px;
+    text-align:center; color:#6b7280; font-size:14px;
+  }
+</style>
 </head>
 <body>
-  <img class="logo" src="assets/TraccLogo1.png" alt="Tracc Logo" />
-  <div id="slides"></div>
-  <footer>Tracc Civil Pod Display System</footer>
+  <div class="frame">
+    <div class="canvas">
+      <img class="brand" src="assets/TraccLogo1.png" alt="TRACC CIVIL" />
+      <div id="slide" class="slide"></div>
+      <div class="footer">© Tracc Civil | Pod Display System</div>
+    </div>
+  </div>
 
-  <script>
-    async function init() {
-      const params = new URLSearchParams(window.location.search);
-      const podKey = params.get("pod") || "FernsPool";
-      const settings = await fetch("config/settings.json").then(r => r.json());
-      const pod = settings.pods[podKey];
-      const endpoint = pod.endpoint;
-      const imagesPath = pod.imagesPath;
+<script>
+/* ========= CONFIG / UTILS ========= */
+const AWTZ = 'Australia/Perth';
+const WORK_START = {h:8, m:0};
+const WORK_END   = {h:17, m:0};
+const OVERLAYS = {
+  IMAGE_TITLE: 'IMAGE_TITLE',
+  NEXT: 'NEXT',
+  SCHEDULE: 'SCHEDULE'
+};
+const qs = new URLSearchParams(location.search);
+const podKey = (qs.get('pod')||'').trim() || 'FernsPool';
 
-      const bookings = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: "{}"
-      }).then(r => r.json()).catch(() => []);
+async function loadSettings(){
+  const r = await fetch('config/settings.json', {cache:'no-store'});
+  if(!r.ok) throw new Error('Cannot load settings.json');
+  return r.json();
+}
 
-      // Convert UTC times to AWST
-      const toAWST = utc => {
-        const d = new Date(utc + "Z");
-        return new Date(d.toLocaleString("en-US", { timeZone: "Australia/Perth" }));
-      };
+/* Parse Flow items -> local Date objects in Australia/Perth */
+function parseEvents(raw){
+  // Expect: [{"subject":"...","organizer":"...","start":"12/11/2025 02:30","end":"12/11/2025 03:30","location":"..."}]
+  // These look like dd/MM/yyyy HH:mm in UTC (based on earlier tests).
+  // We'll parse as local AWTZ by interpreting the numbers and building Date in that tz via string + Intl.
+  const toAWDate = (s)=>{
+    // s like "12/11/2025 02:30"
+    const [d,m,yTime] = s.split('/');
+    const [mth,yrTime] = [m, yTime];
+    const [yyyy, hm] = yrTime.split(' ');
+    const [hh, mm] = hm.split(':');
+    // Build date in AWTZ
+    const iso = `${yyyy}-${String(mth).padStart(2,'0')}-${String(d).padStart(2,'0')}T${hh.padStart(2,'0')}:${mm.padStart(2,'0')}:00`;
+    // Create Date as if in AWTZ, then convert to local Date object by adding the offset difference.
+    // Use Date.parse with 'Z' removed and adjust using Intl.
+    // Easier: create Date from components, then format into AWTZ and back.
+    // We'll rely on Date constructor and then treat string as if local. Instead, use new Date with UTC pieces then shift to AWTZ:
+    const temp = new Date(iso); // interprets as local; we want AWTZ. We'll use Intl to force AWTZ strings later.
+    return new Date(temp.getTime()); // keep as Date; later we’ll format in AWTZ for comparisons
+  };
 
-      const today = new Date();
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 0, 0);
-      const slots = [];
-      for (let h = 8; h < 17; h++) {
-        const start = new Date(startOfDay.getTime());
-        start.setHours(h, 0, 0);
-        const end = new Date(start.getTime());
-        end.setHours(h + 1, 0, 0);
-        slots.push({ start, end, label: `${String(h).padStart(2,"0")}:00 - ${String(h+1).padStart(2,"0")}:00`, status:"free", who:"" });
-      }
+  return (raw||[]).map(ev=>{
+    const start = toAWDate(ev.start);
+    const end   = toAWDate(ev.end);
+    return {
+      subject: (ev.subject||'').trim(),
+      organizer: (ev.organizer||'').trim(),
+      location: (ev.location||'').trim(),
+      start, end
+    };
+  }).sort((a,b)=>a.start-b.start);
+}
 
-      // Mark slots based on bookings
-      bookings.forEach(b => {
-        const start = toAWST(b.start.replace(" ", "T"));
-        const end = toAWST(b.end.replace(" ", "T"));
-        const now = new Date();
-        if (start.toDateString() !== today.toDateString()) return;
+function isSameDayAW(d1, d2){
+  const f = (d)=> new Intl.DateTimeFormat('en-AU',{timeZone:AWTZ, year:'numeric', month:'2-digit', day:'2-digit'}).format(d);
+  return f(d1)===f(d2);
+}
 
-        slots.forEach(s => {
-          if (end <= s.start) return;
-          if (start >= s.end) return;
-          if (now >= start && now <= end) s.status = "inprogress";
-          else if (now > end) s.status = "completed";
-          else s.status = "booked";
-          s.who = b.organizer.trim();
-        });
-      });
+function fmtRangeAW(a,b,{compact=false}={}){
+  const df = new Intl.DateTimeFormat('en-AU',{timeZone:AWTZ, hour:'2-digit', minute:'2-digit'});
+  const tf = (d)=>df.format(d).replace(' ','');
+  const dateF = new Intl.DateTimeFormat('en-AU',{timeZone:AWTZ, day:'2-digit', month:'long', year:'numeric'});
+  if(compact) return `${tf(a)}–${tf(b)}`;
+  return {date: dateF.format(a), time: `${tf(a)}–${tf(b)}`};
+}
 
-      // Build slide HTML
-      const slidesHTML = `
-        <div class="slide active">
-          <img src="${imagesPath}01.jpg" class="hero-image" alt="">
-          <div class="pod-name">${pod.displayName}</div>
-        </div>
-        <div class="slide">
-          <div class="overlay-container">
-            <img src="${imagesPath}02.jpg" class="overlay-bg" alt="">
-            <div class="overlay-box">
-              <h2>${today.toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})} – Bookings</h2>
-              <table class="booking-grid">
-                ${slots.map(s => `
-                  <tr class="${s.status}">
-                    <td>${s.label}</td>
-                    <td>${s.who || 'Free'}</td>
-                  </tr>
-                `).join('')}
-              </table>
-            </div>
-          </div>
-        </div>
-        <div class="slide">
-          <img src="${imagesPath}03.jpg" class="hero-image" alt="">
-          <div class="pod-name">${pod.displayName}</div>
-        </div>
-      `;
+function clampToWorkDay(d, start=true){
+  const z = new Date(d);
+  const parts = new Intl.DateTimeFormat('en-AU',{timeZone:AWTZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);
+  const y = parts.find(p=>p.type==='year').value;
+  const m = parts.find(p=>p.type==='month').value;
+  const da= parts.find(p=>p.type==='day').value;
+  const hh = start ? WORK_START.h : WORK_END.h;
+  const mm = start ? WORK_START.m : WORK_END.m;
+  return new Date(`${y}-${m}-${da}T${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}:00`);
+}
 
-      const slidesContainer = document.getElementById("slides");
-      slidesContainer.innerHTML = slidesHTML;
+/* Build day schedule (booked blocks + free gaps) */
+function buildDaySchedule(events, day){
+  const todayEv = events.filter(e=>isSameDayAW(e.start, day));
+  const blocks=[];
+  let cursor = clampToWorkDay(day,true);
+  const endDay = clampToWorkDay(day,false);
 
-      const slides = document.querySelectorAll(".slide");
-      let idx = 0;
-      setInterval(() => {
-        slides[idx].classList.remove("active");
-        idx = (idx + 1) % slides.length;
-        slides[idx].classList.add("active");
-      }, 15000);
+  for(const ev of todayEv){
+    const evStart = new Date(Math.max(ev.start.getTime(), cursor.getTime()));
+    const evEnd   = new Date(Math.min(ev.end.getTime(), endDay.getTime()));
+
+    if(evEnd <= clampToWorkDay(day,true)) continue; // fully before work
+
+    // Free gap before event
+    if(evStart > cursor){
+      blocks.push({type:'free', start:new Date(cursor), end:new Date(evStart)});
     }
-    init();
-  </script>
+    // Event block clipped to work hours
+    if(evEnd > evStart){
+      blocks.push({type:'busy', start:new Date(evStart), end:new Date(evEnd), who: ev.subject || ev.organizer || 'Booked'});
+      cursor = new Date(evEnd);
+    }
+  }
+  // Tail free time
+  if(cursor < endDay){
+    blocks.push({type:'free', start:new Date(cursor), end:new Date(endDay)});
+  }
+  // Remove sub-minute crumbs
+  return blocks.filter(b=>b.end>b.start);
+}
+
+/* Decide next booking / in-progress */
+function getTodayNextOrProgress(events, now){
+  const today = events.filter(e=>isSameDayAW(e.start, now));
+  today.sort((a,b)=>a.start-b.start);
+  for(const e of today){
+    if(now >= e.start && now <= e.end) return {mode:'progress', ev:e};
+    if(e.start > now) return {mode:'next', ev:e};
+  }
+  return {mode:'none', ev:null};
+}
+
+/* ========= SLIDE TEMPLATES ========= */
+function el(tag, cls, html){
+  const x = document.createElement(tag);
+  if(cls) x.className = cls;
+  if(html!=null) x.innerHTML = html;
+  return x;
+}
+
+function imageSlide({title, src}){
+  const wrap = el('div','photoWrap');
+  const img = el('img','photo'); img.src = src; img.alt = title||'';
+  const overlay = el('div','titleOverlay', title||'');
+  wrap.append(img, overlay);
+  return wrap;
+}
+
+function nextBookingSlide({ev, mode}){
+  const wrap = el('div','photoWrap');
+  const img = el('img','photo'); img.src = window.__currentImageForOverlay; img.alt='';
+  wrap.appendChild(img);
+
+  const card = el('div','card center pad');
+  const h = el('h2',null,'Next Booking');
+  const who = el('div','meta', `<div style="font-weight:800; font-size:clamp(22px,2.2vw,30px); margin-top:4px">${(ev?.subject||ev?.organizer||'')}</div>`);
+  let bottom='';
+  if(ev){
+    const {date,time} = fmtRangeAW(ev.start, ev.end);
+    bottom = `<div class="meta" style="margin-top:6px">${date} — ${time}</div>`;
+  }else{
+    bottom = `<div class="meta" style="margin-top:6px">No bookings today</div>`;
+  }
+  const status = el('div','status '+(mode==='progress'?'progress':(ev?'':'badge')),
+                   ev ? (mode==='progress'?'In progress':'Upcoming') : 'Free all day');
+
+  card.append(h, who, el('div',null,bottom), status);
+  wrap.appendChild(card);
+  return wrap;
+}
+
+function scheduleSlide({title, blocks}){
+  const wrap = el('div','photoWrap');
+  const img = el('img','photo'); img.src = window.__currentImageForOverlay; img.alt='';
+  wrap.appendChild(img);
+
+  const card = el('div','card center pad');
+  const day = blocks.length ? blocks[0].start : new Date();
+  const df = new Intl.DateTimeFormat('en-AU',{timeZone:AWTZ, day:'2-digit', month:'long', year:'numeric'});
+  card.append(el('h2', null, `${df.format(day)} — Bookings`));
+
+  const table = el('table','grid');
+  for(const b of blocks){
+    const row = el('tr');
+    const {date, time} = fmtRangeAW(b.start,b.end,{});
+    const tm = el('td','time', time);
+    const who = el('td','who '+(b.type==='busy'?(isNowBetween(b.start,b.end)?'progress':'busy'):'free'),
+                   b.type==='busy' ? (b.who||'Booked') : 'Free');
+    row.append(tm, who);
+    table.append(row);
+  }
+  card.appendChild(table);
+  wrap.appendChild(card);
+  // Title on top
+  const overlay = el('div','titleOverlay', title||'');
+  wrap.appendChild(overlay);
+  return wrap;
+}
+function isNowBetween(a,b){
+  const now = new Date();
+  return now>=a && now<=b;
+}
+
+/* ========= IMAGE SRC HELPER (jpg + jpeg) ========= */
+function podImages(podDir){
+  // We cannot list directories on GH pages, so assume 01/02/03 with jpg/jpeg
+  const tryList = ext => [`01.${ext}`,`02.${ext}`,`03.${ext}`].map(n=>`${podDir}${n}`);
+  return [...tryList('jpg'), ...tryList('jpeg')];
+}
+async function probeFirstExisting(urls){
+  for(const u of urls){
+    try{
+      const r = await fetch(u,{method:'HEAD', cache:'no-store'});
+      if(r.ok) return u;
+    }catch{}
+  }
+  return urls[0]; // fallback
+}
+
+/* ========= MAIN ========= */
+(async()=>{
+  const settings = await loadSettings();
+  const pod = settings.pods[podKey];
+  if(!pod) {
+    document.getElementById('slide').innerHTML = `<div style="padding:40px">Unknown pod: ${podKey}</div>`;
+    return;
+  }
+
+  // Build image list with jpg/jpeg support
+  const base = pod.imagesPath.endsWith('/') ? pod.imagesPath : pod.imagesPath + '/';
+  const img1 = await probeFirstExisting([`${base}01.jpg`,`${base}01.jpeg`]);
+  const img2 = await probeFirstExisting([`${base}02.jpg`,`${base}02.jpeg`]);
+  const img3 = await probeFirstExisting([`${base}03.jpg`,`${base}03.jpeg`]);
+
+  // Fetch events from your Flow endpoint
+  let events=[];
+  try{
+    const r = await fetch(pod.endpoint, {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'});
+    const raw = await r.json();
+    events = parseEvents(raw);
+  }catch(e){
+    console.warn('events fetch failed', e);
+  }
+
+  // Build today schedule + next/progress
+  const now = new Date();
+  const scheduleBlocks = buildDaySchedule(events, now);
+  const {mode, ev} = getTodayNextOrProgress(events, now);
+
+  // Prepare slide deck
+  const slideHost = document.getElementById('slide');
+  const slides = [];
+  // Slide 1 – image 01 with title
+  slides.push(()=>{ 
+    const wrap=imageSlide({title: pod.displayName, src: img1});
+    return wrap;
+  });
+
+  // Slide 2 – NEXT (over an image background)
+  slides.push(()=>{
+    window.__currentImageForOverlay = img2; // background for overlay
+    const wrap = nextBookingSlide({ev, mode});
+    const overlay = el('div','titleOverlay', pod.displayName);
+    wrap.appendChild(overlay);
+    return wrap;
+  });
+
+  // Slide 3 – SCHEDULE overlay
+  slides.push(()=>{
+    window.__currentImageForOverlay = img3; // background
+    const wrap = scheduleSlide({title: pod.displayName, blocks: scheduleBlocks});
+    return wrap;
+  });
+
+  // Slide 4 – image 02 with title
+  slides.push(()=> imageSlide({title: pod.displayName, src: img2}));
+  // Slide 5 – image 03 with title
+  slides.push(()=> imageSlide({title: pod.displayName, src: img3}));
+
+  const durations = [10000, 12000, 15000, 10000, 10000];
+
+  let idx=0, timer=null;
+  const show = (i)=>{
+    idx=i%slides.length;
+    slideHost.innerHTML='';
+    const node = slides[idx]();
+    slideHost.appendChild(node);
+    clearTimeout(timer);
+    timer = setTimeout(()=>show(idx+1), durations[idx]);
+  };
+  show(0);
+})();
+</script>
 </body>
 </html>
