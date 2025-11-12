@@ -1,341 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
 <title>Pod Display</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<!-- Luxon for reliable timezone handling -->
 <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
 <style>
-  :root{
-    --fg:#111;
-    --muted:#666;
-    --accent:#137cbd;
-    --chip:#22a34a;
-    --bg:#fff;           /* force light */
-    --card:#f6f7f8;
-    --shadow:0 10px 30px rgba(0,0,0,.08);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-  .app{height:100vh;width:100vw;overflow:hidden;position:relative}
-
-  /* header */
-  .brand{
-    position:fixed;left:24px;top:18px;display:flex;align-items:center;gap:12px;z-index:3
-  }
-  .brand img{height:32px;width:auto}
-  .brand .title{font-weight:700;font-size:22px;letter-spacing:.2px}
-
-  /* slide framework */
-  .slide{
-    position:absolute;inset:0;display:none;padding:84px 48px 48px 48px;
-  }
-  .slide.active{display:block;animation:fade .3s ease}
-  @keyframes fade{from{opacity:.02}to{opacity:1}}
-
-  /* image slides */
-  .imageWrap{height:100%;display:grid;place-items:center}
-  .imageCard{
-    max-width:88vw;max-height:82vh;border-radius:22px;overflow:hidden;
-    box-shadow:var(--shadow);background:#fff;display:flex;align-items:center;justify-content:center
-  }
-  .imageCard img{display:block;max-width:100%;max-height:100%;object-fit:cover}
-
-  .imageTitle{
-    position:absolute;top:70px;left:0;right:0;text-align:center;font-weight:700;font-size:46px;
-  }
-
-  /* next booking */
-  .nextWrap{
-    height:100%;display:flex;align-items:center;justify-content:center
-  }
-  .nextCard{
-    width:min(860px,92vw);padding:36px;border-radius:20px;background:var(--card);box-shadow:var(--shadow);
-    text-align:center
-  }
-  .nb-title{font-size:28px;font-weight:700;margin:0 0 14px}
-  .nb-name{font-size:22px;font-weight:700;margin:6px 0}
-  .nb-line{margin:2px 0;font-size:19px;color:var(--muted)}
-  .nb-when{font-size:22px;margin-top:12px}
-  .chip{
-    display:inline-block;background:var(--chip);color:#fff;border-radius:999px;padding:6px 12px;font-size:14px;margin-top:10px
-  }
-
-  /* calendar slide */
-  .calShell{
-    height:100%;display:flex;align-items:center;justify-content:center
-  }
-  .calCard{
-    width:min(1200px,96vw);height:min(790px,78vh); /* fit 1080p without cut */
-    background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:22px 22px 10px 22px;display:flex;flex-direction:column
-  }
-  .calHead{display:flex;align-items:baseline;justify-content:space-between;padding:0 8px 12px}
-  .calTitle{font-size:28px;font-weight:700}
-  .calMonth{color:var(--muted)}
-  .grid{
-    flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr;gap:10px;min-height:0
-  }
-  .cell{
-    background:#fff;border-radius:14px;padding:8px;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:0
-  }
-  .dayNum{color:var(--muted);font-size:14px;font-weight:600}
-  .today{outline:2px solid var(--accent)}
-  .pill{
-    margin-top:6px;border-radius:10px;background:rgba(34,163,74,.15);
-    color:#1a7c3a;font-size:12px;line-height:1.25;padding:6px 8px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden
-  }
-
-  /* footer watermark */
-  .wm{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);font-size:12px;color:var(--muted)}
+html,body{margin:0;padding:0;height:100%;width:100%;
+  background:#fff;color:#111;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;}
+.app{position:relative;height:100vh;width:100vw;overflow:hidden;background:#fff;}
+/* header */
+.brand{position:fixed;left:20px;top:15px;display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.9);padding:4px 10px;border-radius:8px;z-index:5;box-shadow:0 0 10px rgba(0,0,0,.05);}
+.brand img{height:36px;width:auto;}
+.brand .title{font-weight:700;font-size:22px;color:#111;}
+/* slide */
+.slide{position:absolute;inset:0;display:none;background:#fff;}
+.slide.active{display:block;animation:fade .3s ease;}
+@keyframes fade{from{opacity:.05}to{opacity:1}}
+/* images */
+.imageWrap{display:flex;align-items:center;justify-content:center;height:100%;}
+.imageCard{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.imageCard img{max-width:100%;max-height:100%;object-fit:contain;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.1);}
+.imageTitle{text-align:center;font-weight:700;font-size:46px;position:absolute;top:65px;left:0;right:0;color:#fff;
+  text-shadow:0 2px 6px rgba(0,0,0,.6);}
+.imageTitle::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;}
+/* next booking */
+.nextWrap{display:flex;align-items:center;justify-content:center;height:100%;background:#fff;}
+.nextCard{padding:38px 46px;background:#fff;border-radius:24px;box-shadow:0 8px 24px rgba(0,0,0,.1);text-align:center;}
+.nb-title{font-size:32px;font-weight:700;margin-bottom:16px;}
+.nb-name{font-size:24px;font-weight:700;}
+.nb-line{font-size:19px;color:#555;margin:3px 0;}
+.nb-when{font-size:22px;margin-top:10px;color:#000;}
+.chip{display:inline-block;margin-top:16px;background:#1ea24b;color:#fff;border-radius:999px;padding:8px 14px;font-weight:600;}
+/* calendar */
+.calWrap{display:flex;align-items:center;justify-content:center;height:100%;background:#fff;}
+.calCard{width:90%;max-width:1280px;height:90%;background:#fff;border-radius:24px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);padding:20px 30px;display:flex;flex-direction:column;}
+.calHeader{text-align:center;margin-bottom:10px;}
+.calHeader h2{margin:0;font-size:32px;font-weight:700;}
+.calHeader .month{color:#666;font-size:18px;}
+.calendar{flex:1;display:grid;grid-template-columns:repeat(7,1fr);
+  grid-auto-rows:minmax(80px,1fr);gap:8px;width:100%;height:100%;}
+.day{background:#f8f9fa;border-radius:12px;padding:6px 6px 2px 6px;position:relative;overflow:hidden;}
+.day.today{outline:2px solid #137cbd;}
+.dayNum{font-size:14px;color:#555;font-weight:600;}
+.event{background:#c7efd2;color:#13692f;border-radius:6px;font-size:12px;padding:3px 5px;margin-top:4px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;}
+.wm{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);font-size:12px;color:#888;}
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <div class="brand" id="brand">
-    <img src="assets/TraccLogo1.png" alt="TRACC CIVIL">
-    <div class="title" id="brandTitle">Loading…</div>
-  </div>
+<div class="app">
+  <div class="brand"><img src="assets/TraccLogo1.png"><div class="title" id="brandTitle">Loading…</div></div>
 
-  <!-- Slide 1 – image 01 -->
-  <section class="slide" id="slide-img-1">
-    <div class="imageTitle" id="imgTitle1"></div>
-    <div class="imageWrap">
-      <div class="imageCard">
-        <img id="img1" alt="Pod image 01">
-      </div>
-    </div>
+  <section class="slide" id="s1">
+    <div class="imageWrap"><div class="imageCard"><img id="img1"></div></div>
+    <div class="imageTitle" id="title1"></div>
   </section>
 
-  <!-- Slide 2 – next booking -->
-  <section class="slide" id="slide-next">
+  <section class="slide" id="s2">
     <div class="nextWrap">
       <div class="nextCard">
         <div class="nb-title">Next Booking</div>
         <div class="nb-name" id="nbName">—</div>
-        <div class="nb-line"  id="nbOrg">—</div>
-        <div class="nb-when" id="nbWhen">—</div>
-        <div class="nb-line"  id="nbLoc">—</div>
+        <div class="nb-line" id="nbOrg"></div>
+        <div class="nb-when" id="nbWhen"></div>
+        <div class="nb-line" id="nbLoc"></div>
         <div class="chip" id="nbChip" style="display:none;">Busy</div>
       </div>
     </div>
   </section>
 
-  <!-- Slide 3 – image 02 -->
-  <section class="slide" id="slide-img-2">
-    <div class="imageTitle" id="imgTitle2"></div>
-    <div class="imageWrap"><div class="imageCard"><img id="img2" alt="Pod image 02"></div></div>
+  <section class="slide" id="s3">
+    <div class="imageWrap"><div class="imageCard"><img id="img2"></div></div>
+    <div class="imageTitle" id="title2"></div>
   </section>
 
-  <!-- Slide 4 – month calendar -->
-  <section class="slide" id="slide-cal">
-    <div class="calShell">
+  <section class="slide" id="s4">
+    <div class="calWrap">
       <div class="calCard">
-        <div class="calHead">
-          <div>
-            <div class="calTitle">Monthly View</div>
-            <div class="calMonth" id="calMonth">—</div>
-          </div>
+        <div class="calHeader">
+          <h2>Monthly View</h2>
+          <div class="month" id="monthName"></div>
         </div>
-        <div class="grid" id="grid">
-          <!-- Cells injected -->
-        </div>
+        <div class="calendar" id="calendar"></div>
       </div>
     </div>
   </section>
 
-  <!-- Slide 5 – image 03 -->
-  <section class="slide" id="slide-img-3">
-    <div class="imageTitle" id="imgTitle3"></div>
-    <div class="imageWrap"><div class="imageCard"><img id="img3" alt="Pod image 03"></div></div>
+  <section class="slide" id="s5">
+    <div class="imageWrap"><div class="imageCard"><img id="img3"></div></div>
+    <div class="imageTitle" id="title3"></div>
   </section>
 
-  <div class="wm">© Tracc Civil | Pod Display System</div>
+  <div class="wm">©️ Tracc Civil | Pod Display System</div>
 </div>
 
 <script>
-/* ------------ config & helpers ------------- */
 const { DateTime } = luxon;
-const PERTH = 'Australia/Perth';          // Force AWST
-const DURATIONS = [10000, 15000, 15000, 15000, 10000]; // s1..s5
-
-const qs = new URLSearchParams(location.search);
-const podKey = (qs.get('pod') || 'FernsPool').replace(/\s+/g,''); // default
-
-async function getSettings(){
-  const res = await fetch('config/settings.json?ts=' + Date.now());
-  if(!res.ok) throw new Error('settings.json not found');
-  return res.json();
-}
-
-function ensureTrailingSlash(p){ return /\/$/.test(p) ? p : p + '/'; }
-
-function parseUtcToPerth(dateStr){
-  // Logic App returns "DD/MM/YYYY HH:mm" in UTC
-  // Be tolerant of single-digit day/month too
-  const dt = DateTime.fromFormat(dateStr, 'd/L/yyyy HH:mm', { zone: 'utc' });
-  return dt.setZone(PERTH);
-}
-
-function fmtRangePerth(startStr,endStr){
-  const s = parseUtcToPerth(startStr);
-  const e = parseUtcToPerth(endStr);
-  return {
-    s, e,
-    dateLabel: s.toFormat('ccc d LLL yyyy'),
-    timeLabel: `${s.toFormat('HH:mm')} – ${e.toFormat('HH:mm')}`
-  };
-}
-
-/* ------------ renderers ------------- */
-function setBrand(podName){
-  document.getElementById('brandTitle').textContent = podName;
-}
-
-function setImageSlides(basePath, podName){
-  const img1 = basePath + '01.jpg';
-  const img2 = basePath + '02.jpg';
-  const img3 = basePath + '03.jpg';
-  document.getElementById('img1').src = img1;
-  document.getElementById('img2').src = img2;
-  document.getElementById('img3').src = img3;
-  document.getElementById('imgTitle1').textContent = podName;
-  document.getElementById('imgTitle2').textContent = podName;
-  document.getElementById('imgTitle3').textContent = podName;
-}
-
-function renderNextBooking(events, displayName){
-  const nbName = document.getElementById('nbName');
-  const nbOrg  = document.getElementById('nbOrg');
-  const nbWhen = document.getElementById('nbWhen');
-  const nbLoc  = document.getElementById('nbLoc');
-  const nbChip = document.getElementById('nbChip');
-
-  if(!events || !events.length){
-    nbName.textContent = 'No upcoming bookings';
-    nbOrg.textContent = '';
-    nbWhen.textContent = '';
-    nbLoc.textContent  = displayName;
-    nbChip.style.display = 'none';
-    return;
-  }
-  // assume events already sorted by start
-  const ev = events[0];
-  const rng = fmtRangePerth(ev.start, ev.end);
-
-  nbName.textContent = (ev.organizer || ev.subject || 'Booked');
-  nbOrg.textContent  = ev.organizer ? `Organizer: ${ev.organizer}` : (ev.subject || '');
-  nbWhen.textContent = `${rng.dateLabel} — ${rng.timeLabel}`;
-  nbLoc.textContent  = `Location: ${displayName}`;
-  nbChip.style.display = 'inline-block';
-}
-
-function renderMonthCalendar(events){
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-
-  // Work with current month in Perth
-  const nowPerth = DateTime.now().setZone(PERTH);
-  const first = nowPerth.startOf('month');
-  const last  = nowPerth.endOf('month');
-  const startWeekday = first.weekday % 7; // 1..7 -> 1..0
-  const days = last.day;
-
-  document.getElementById('calMonth').textContent = nowPerth.toFormat('LLLL yyyy');
-
-  // Create 6x7 grid (always safe)
-  const totalCells = 42;
-  for(let i=0;i<totalCells;i++){
-    const cell = document.createElement('div');
-    cell.className = 'cell';
-    const dayNum = i - startWeekday + 1;
-    if(dayNum>=1 && dayNum<=days){
-      const dn = document.createElement('div');
-      dn.className = 'dayNum';
-      dn.textContent = dayNum;
-      cell.appendChild(dn);
-
-      const dStart = first.set({ day: dayNum }).startOf('day');
-      const dEnd   = dStart.endOf('day');
-
-      // add event pills for this date (in Perth)
-      (events||[]).forEach(ev=>{
-        const s = parseUtcToPerth(ev.start);
-        const e = parseUtcToPerth(ev.end);
-        if( (s >= dStart && s <= dEnd) || (e >= dStart && e <= dEnd) ){
-          const pill = document.createElement('div');
-          pill.className = 'pill';
-          pill.textContent = `${s.toFormat('HH:mm')} – ${e.toFormat('HH:mm')}  Busy`;
-          cell.appendChild(pill);
-        }
-      });
-
-      if(dayNum === nowPerth.day) cell.classList.add('today');
-    }
-    grid.appendChild(cell);
-  }
-}
-
-/* ------------ slideshow ------------- */
-const slides = [
-  'slide-img-1',
-  'slide-next',
-  'slide-img-2',
-  'slide-cal',
-  'slide-img-3'
-];
-let slideIndex = 0, timerId=null;
-
-function show(i){
-  document.querySelectorAll('.slide').forEach(el=>el.classList.remove('active'));
-  document.getElementById(slides[i]).classList.add('active');
-}
-
-function startLoop(){
-  show(slideIndex);
-  timerId = setTimeout(()=>{
-    slideIndex = (slideIndex + 1) % slides.length;
-    startLoop();
-  }, DURATIONS[slideIndex]);
-}
-
-/* ------------ bootstrap ------------- */
+const PERTH = 'Australia/Perth';
+const DUR = [10000,15000,15000,15000,10000];
+const slides=['s1','s2','s3','s4','s5'];let i=0;
+function showSlide(k){document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));
+document.getElementById(slides[k]).classList.add('active');}
+async function getSettings(){const r=await fetch('config/settings.json?'+Date.now());return r.json();}
+function parseUTCtoAWST(str){const d=DateTime.fromFormat(str,'d/L/yyyy HH:mm',{zone:'utc'});return d.setZone(PERTH);}
 (async()=>{
-  try{
-    const settings = await getSettings();
-    const pod = settings.pods[podKey] || Object.values(settings.pods)[0];
-    const podName = pod.displayName || podKey;
-    setBrand(podName);
-    const imagesBase = ensureTrailingSlash(pod.imagesPath);
-    setImageSlides(imagesBase, podName);
-
-    // fetch events
-    const res = await fetch(pod.endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:'{}' });
-    const raw = await res.json(); // array
-    // Normalize + sort by start (UTC strings)
-    const events = (Array.isArray(raw)? raw: [])
-      .map(x=>({
-        subject: x.subject || '',
-        organizer: x.organizer || '',
-        start: x.start, end: x.end, location: x.location || ''
-      }))
-      .sort((a,b)=>{
-        const da = DateTime.fromFormat(a.start,'d/L/yyyy HH:mm',{zone:'utc'});
-        const db = DateTime.fromFormat(b.start,'d/L/yyyy HH:mm',{zone:'utc'});
-        return da - db;
-      });
-
-    renderNextBooking(events, podName);
-    renderMonthCalendar(events);
-
-    // Kick slideshow
-    startLoop();
-  }catch(e){
-    console.error(e);
-    document.getElementById('brandTitle').textContent = 'Load error';
-  }
+const qs=new URLSearchParams(location.search);const pod=qs.get('pod')||'FernsPool';
+const cfg=await getSettings();const p=cfg.pods[pod]||Object.values(cfg.pods)[0];
+document.getElementById('brandTitle').textContent=p.displayName;
+['title1','title2','title3'].forEach(id=>document.getElementById(id).textContent=p.displayName);
+document.getElementById('img1').src=p.imagesPath+'01.jpg';
+document.getElementById('img2').src=p.imagesPath+'02.jpg';
+document.getElementById('img3').src=p.imagesPath+'03.jpg';
+const data=await fetch(p.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(r=>r.json());
+const evts=(Array.isArray(data)?data:[]).map(e=>({
+sub:e.subject,org:e.organizer,start:e.start,end:e.end,loc:e.location||p.displayName}));
+if(evts.length){const next=evts.sort((a,b)=>DateTime.fromFormat(a.start,'d/L/yyyy HH:mm')-
+DateTime.fromFormat(b.start,'d/L/yyyy HH:mm'))[0];
+const s=parseUTCtoAWST(next.start),e=parseUTCtoAWST(next.end);
+document.getElementById('nbName').textContent=next.sub||'—';
+document.getElementById('nbOrg').textContent='Organizer: '+(next.org||'—');
+document.getElementById('nbWhen').textContent=⁠ ${s.toFormat('ccc dd LLL yyyy')} — ${s.toFormat('HH:mm')} to ${e.toFormat('HH:mm')} ⁠;
+document.getElementById('nbLoc').textContent='Location: '+next.loc;
+document.getElementById('nbChip').style.display='inline-block';
+}
+// calendar
+const now=DateTime.now().setZone(PERTH);const start=now.startOf('month');const days=now.daysInMonth;
+const cal=document.getElementById('calendar');cal.innerHTML='';
+document.getElementById('monthName').textContent=now.toFormat('LLLL yyyy');
+const offset=(start.weekday)%7;
+for(let j=0;j<offset;j++){const d=document.createElement('div');d.className='day';cal.appendChild(d);}
+for(let d=1;d<=days;d++){const cell=document.createElement('div');cell.className='day';
+if(d===now.day)cell.classList.add('today');const dn=document.createElement('div');dn.className='dayNum';dn.textContent=d;
+cell.appendChild(dn);
+const dayStart=start.plus({days:d-1}).startOf('day');const dayEnd=dayStart.endOf('day');
+evts.forEach(e=>{
+const s=parseUTCtoAWST(e.start),ee=parseUTCtoAWST(e.end);
+if(s>=dayStart&&s<=dayEnd){const ev=document.createElement('div');ev.className='event';
+ev.textContent=⁠ ${s.toFormat('HH:mm')}–${ee.toFormat('HH:mm')} Busy ⁠;cell.appendChild(ev);}
+});
+cal.appendChild(cell);}
+showSlide(0);setInterval(()=>{i=(i+1)%slides.length;showSlide(i);},DUR[i]);
 })();
 </script>
 </body>
