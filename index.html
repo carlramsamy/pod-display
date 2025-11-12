@@ -12,70 +12,57 @@
   --muted:#666;
   --card:#fff;
   --bg:#fff;
-  --accent:#0b5fff;
   --busy:#2e7d32;
   --shadow:0 6px 18px rgba(16,24,40,0.08);
-  --radius:16px;
 }
 html,body{
   margin:0;padding:0;height:100%;
   background:var(--bg);color:var(--ink);
-  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-.app{
-  min-height:100vh;display:flex;flex-direction:column;
-  align-items:center;justify-content:flex-start;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
 }
 
-/* Fixed top bar */
-.topbar{
-  position:fixed;top:0;left:0;width:100%;
-  display:flex;justify-content:space-between;align-items:center;
+/* --- LOGO fixed top centre --- */
+.logoFixed{
+  position:fixed;top:12px;left:50%;
+  transform:translateX(-50%);
+  z-index:20;
   background:#fff;
-  box-shadow:0 1px 8px rgba(0,0,0,0.05);
-  padding:12px 24px;
-  z-index:10;
-}
-.podName{
-  font-size:26px;font-weight:800;color:#fff;
-  background:#007a3d;
-  padding:10px 24px;border-radius:12px;
+  border-radius:14px;
+  padding:6px 12px;
   box-shadow:var(--shadow);
 }
-.logoBox{
-  background:#fff;padding:8px 14px;border-radius:12px;
-  box-shadow:var(--shadow);
-}
-.logoBox img{height:40px;width:auto;display:block;}
+.logoFixed img{height:48px;width:auto;display:block;}
 
-/* Slides container */
+/* --- Slides --- */
 .stage{
-  width:100%;margin-top:80px;
-  box-sizing:border-box;
+  margin-top:70px;
+  width:100%;height:calc(100vh - 70px);
 }
 .slide{display:none;}
 .slide.active{display:block;}
 
 /* Hero slides */
 .hero{
-  position:relative;width:100%;
-  height:calc(100vh - 120px);
+  position:relative;
+  width:100%;height:100%;
   border-radius:24px;overflow:hidden;
   background:#fff;box-shadow:var(--shadow);
 }
 .hero img{width:100%;height:100%;object-fit:cover;}
 .heroTitle{
-  position:absolute;top:18px;width:100%;
+  position:absolute;top:24px;width:100%;
   text-align:center;font-size:48px;font-weight:800;color:#fff;
   text-shadow:0 2px 8px rgba(0,0,0,0.4);
 }
 
-/* Next booking card */
-.cardWrap{display:flex;align-items:center;justify-content:center;
-  height:calc(100vh - 120px);}
+/* Next Booking */
+.cardWrap{display:flex;align-items:center;justify-content:center;height:100%;}
 .card{
-  width:min(880px,92vw);background:#fff;border-radius:24px;
-  box-shadow:var(--shadow);padding:32px 36px;text-align:center;
+  width:min(880px,92vw);
+  background:#fff;border-radius:24px;
+  box-shadow:var(--shadow);
+  padding:32px 36px;text-align:center;
 }
 .h1{font-size:42px;font-weight:900;margin:0 0 10px;}
 .h2{font-size:26px;font-weight:800;margin:12px 0 4px;}
@@ -87,95 +74,93 @@ html,body{
   background:var(--busy);color:#fff;border-radius:999px;font-weight:800;
 }
 
-/* Calendar slide */
+/* Calendar */
 .calCard{
-  width:96%;max-width:1200px;margin:0 auto;
   background:#fff;border-radius:24px;
   box-shadow:var(--shadow);
-  padding:22px 22px 26px;box-sizing:border-box;
-  display:flex;flex-direction:column;align-items:center;
+  width:420px;height:570px; /* ≈22cm x 30cm at 96dpi */
+  margin:0 auto;
+  padding:18px 18px 22px;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
 }
-.calHead{text-align:left;width:100%;margin-bottom:8px;}
-.calTitle{font-size:28px;font-weight:900;}
-.calMonth{color:var(--muted);margin-top:4px;}
+.calHead{text-align:center;margin-bottom:8px;}
+.calTitle{font-size:26px;font-weight:900;}
+.calMonth{color:var(--muted);}
 .calendar{
-  display:grid;gap:10px;
+  display:grid;gap:6px;
   grid-template-columns:repeat(7,1fr);
-  grid-auto-rows:minmax(80px,1fr);
+  grid-auto-rows:minmax(40px,1fr);
   width:100%;
-  max-height:68vh;
-  overflow:hidden;
+  height:calc(100% - 60px);
 }
-.dow{text-align:center;font-weight:700;color:var(--muted);}
+.dow{text-align:center;font-weight:700;color:var(--muted);font-size:13px;}
 .day{
-  border-radius:12px;background:#f6f7fb;
-  position:relative;padding:8px;box-sizing:border-box;
+  border-radius:8px;background:#f6f7fb;
+  position:relative;padding:4px;box-sizing:border-box;
+  overflow:hidden;font-size:12px;
 }
-.num{position:absolute;top:6px;right:10px;color:#9aa3af;font-weight:800;}
-.today{outline:3px solid var(--accent);outline-offset:-3px;}
-.slot{margin-top:28px;}
+.num{position:absolute;top:3px;right:6px;color:#9aa3af;font-weight:800;font-size:11px;}
+.today{outline:2px solid #0b5fff;outline-offset:-2px;}
+.slot{margin-top:18px;}
 .tag{
   display:inline-block;background:var(--busy);color:#fff;
-  border-radius:999px;padding:3px 10px;
-  font-size:12px;font-weight:800;
+  border-radius:999px;padding:2px 6px;
+  font-size:10px;font-weight:800;
 }
 
 /* Footer */
-.foot{width:100%;text-align:center;color:#98a2b3;
-  font-size:13px;padding:8px 0 14px;}
+.foot{width:100%;text-align:center;color:#98a2b3;font-size:13px;padding:8px 0 14px;}
 </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="podName" id="podTitle">Pod</div>
-    <div class="logoBox"><img src="assets/TraccLogo1.png" alt="TRACC Civil"></div>
+  <!-- Fixed centered logo -->
+  <div class="logoFixed">
+    <img src="assets/TraccLogo1.png" alt="TRACC Civil">
   </div>
 
-  <div class="app">
-    <div class="stage">
-      <!-- 1: Hero 01 -->
-      <section class="slide active" id="slide-hero-1">
-        <div class="hero"><img id="hero1"><div class="heroTitle" id="hero1Title"></div></div>
-      </section>
+  <div class="stage">
+    <!-- 1: Hero 01 -->
+    <section class="slide active" id="slide-hero-1">
+      <div class="hero"><img id="hero1"><div class="heroTitle" id="hero1Title"></div></div>
+    </section>
 
-      <!-- 2: Next Booking -->
-      <section class="slide" id="slide-next">
-        <div class="cardWrap">
-          <div class="card">
-            <div class="h1">Next Booking</div>
-            <div class="h2" id="nbWho">—</div>
-            <div class="meta" id="nbOrg">—</div>
-            <div class="time" id="nbWhen">—</div>
-            <div class="loc" id="nbWhere">—</div>
-            <div class="pill">Busy</div>
-          </div>
+    <!-- 2: Next Booking -->
+    <section class="slide" id="slide-next">
+      <div class="cardWrap">
+        <div class="card">
+          <div class="h1">Next Booking</div>
+          <div class="h2" id="nbWho">—</div>
+          <div class="meta" id="nbOrg">—</div>
+          <div class="time" id="nbWhen">—</div>
+          <div class="loc" id="nbWhere">—</div>
+          <div class="pill">Busy</div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- 3: Hero 02 -->
-      <section class="slide" id="slide-hero-2">
-        <div class="hero"><img id="hero2"><div class="heroTitle" id="hero2Title"></div></div>
-      </section>
+    <!-- 3: Hero 02 -->
+    <section class="slide" id="slide-hero-2">
+      <div class="hero"><img id="hero2"><div class="heroTitle" id="hero2Title"></div></div>
+    </section>
 
-      <!-- 4: Calendar -->
-      <section class="slide" id="slide-cal">
-        <div class="calCard">
-          <div class="calHead">
-            <div class="calTitle">Monthly View</div>
-            <div class="calMonth" id="calMonth">—</div>
-          </div>
-          <div class="calendar" id="calendar"></div>
+    <!-- 4: Calendar -->
+    <section class="slide" id="slide-cal">
+      <div class="calCard">
+        <div class="calHead">
+          <div class="calTitle">Monthly View</div>
+          <div class="calMonth" id="calMonth">—</div>
         </div>
-      </section>
+        <div class="calendar" id="calendar"></div>
+      </div>
+    </section>
 
-      <!-- 5: Hero 03 -->
-      <section class="slide" id="slide-hero-3">
-        <div class="hero"><img id="hero3"><div class="heroTitle" id="hero3Title"></div></div>
-      </section>
-    </div>
-
-    <div class="foot">© Tracc Civil | Pod Display System</div>
+    <!-- 5: Hero 03 -->
+    <section class="slide" id="slide-hero-3">
+      <div class="hero"><img id="hero3"><div class="heroTitle" id="hero3Title"></div></div>
+    </section>
   </div>
+
+  <div class="foot">© Tracc Civil | Pod Display System</div>
 
 <script>
 const TZ='Australia/Perth';
@@ -216,8 +201,9 @@ async function loadSettings(){
   const r=await fetch(settingsUrl,{cache:'no-store'});if(!r.ok)throw new Error('settings.json missing');
   const cfg=await r.json();const map=cfg.pods||{};
   if(!map[podKey])throw new Error('Unknown pod '+podKey);
-  podCfg=map[podKey];const name=podCfg.displayName||podKey;
-  ['podTitle','hero1Title','hero2Title','hero3Title'].forEach(id=>qs(id).textContent=name);
+  podCfg=map[podKey];
+  const name=podCfg.displayName||podKey;
+  ['hero1Title','hero2Title','hero3Title'].forEach(id=>qs(id).textContent=name);
   qs('hero1').src=`Pod-Images/${podKey}/01.jpg`;
   qs('hero2').src=`Pod-Images/${podKey}/02.jpg`;
   qs('hero3').src=`Pod-Images/${podKey}/03.jpg`;
