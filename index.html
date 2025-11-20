@@ -16,9 +16,9 @@
     --green: #2e7d32;
     --bg:#ffffff;
     --panel:#f7f7f7;
-    --maxw: 1780px;      /* safe for 1080p wide TVs */
+    --maxw: 1780px;
     --content-w: 1620px;
-    --bottom-clear: 54px;/* more room for footer */
+    --bottom-clear: 54px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -45,7 +45,7 @@
   .slide{
     width:100%;
     height:calc(100vh - 2*18px - 2*22px - var(--bottom-clear));
-    max-height:850px;                     /* protect footer */
+    max-height:850px;
     display:flex; align-items:center; justify-content:center;
   }
   .photoWrap{
@@ -120,13 +120,10 @@ async function loadSettings(){
   return r.json();
 }
 
-/* Parse dd/MM/yyyy HH:mm as **UTC** then create Date */
 function parseFlowUTC(s){
-  // "12/11/2025 02:30" => UTC Date
   const [d,m,rest] = s.trim().split('/');
   const [yyyy,time] = rest.split(' ');
   const [hh,mm] = time.split(':');
-  // Date.UTC(year, monthIndex, day, hours, minutes)
   return new Date(Date.UTC(+yyyy, (+m)-1, +d, +hh, +mm, 0));
 }
 
@@ -160,27 +157,20 @@ function awDayStart(d,{h,m}){
   const y = parts.find(p=>p.type==='year').value;
   const mo= parts.find(p=>p.type==='month').value;
   const da= parts.find(p=>p.type==='day').value;
-  // build as local string then interpret; JS stores UTC internally so it's ok
   return new Date(`${y}-${mo}-${da}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`);
 }
 
 function buildDaySchedule(events, day){
   const startDay = awDayStart(day, WORK_START);
   const endDay   = awDayStart(day, WORK_END);
-
-  // Keep only today's events (in AWST calendar sense)
   const todays = events.filter(e=>isSameDayAW(e.start, day));
-
   const blocks=[];
   let cursor = new Date(startDay);
-
   for(const e of todays){
     const s = new Date(Math.max(e.start.getTime(), startDay.getTime()));
     const en= new Date(Math.min(e.end.getTime(),   endDay.getTime()));
-    if(en <= startDay) continue;          // event entirely before workday
-    if(s > cursor){                       // free gap
-      blocks.push({type:'free', start:new Date(cursor), end:new Date(s)});
-    }
+    if(en <= startDay) continue;
+    if(s > cursor){ blocks.push({type:'free', start:new Date(cursor), end:new Date(s)}); }
     if(en > s){
       blocks.push({
         type:'busy',
@@ -191,10 +181,7 @@ function buildDaySchedule(events, day){
       cursor = new Date(en);
     }
   }
-  if(cursor < endDay){
-    blocks.push({type:'free', start:new Date(cursor), end:new Date(endDay)});
-  }
-  // Remove sub-minute crumbs
+  if(cursor < endDay){ blocks.push({type:'free', start:new Date(cursor), end:new Date(endDay)}); }
   return blocks.filter(b => b.end - b.start >= 60*1000);
 }
 
@@ -248,7 +235,7 @@ function scheduleSlide({title, blocks, bg}){
     const row = el('tr');
     const {time} = fmtRangeAW(b.start,b.end);
     row.append(el('td','time', time));
-    const cls = b.type==='busy' ? ( (new Date()>=b.start && new Date()<=b.end) ? 'who progress' : 'who busy') : 'who free';
+    const cls = b.type==='busy' ? ((new Date()>=b.start && new Date()<=b.end) ? 'who progress' : 'who busy') : 'who free';
     row.append(el('td',cls, b.type==='busy' ? (b.who||'Booked') : 'Free'));
     table.append(row);
   }
@@ -257,7 +244,6 @@ function scheduleSlide({title, blocks, bg}){
   return wrap;
 }
 
-/* JPG + JPEG support */
 async function firstExisting(urls){
   for(const u of urls){
     try{ const r=await fetch(u,{method:'HEAD',cache:'no-store'}); if(r.ok) return u; }catch{}
@@ -287,7 +273,7 @@ async function threeImages(base){
     events = parseEvents(raw);
   }catch(e){ console.warn('Flow fetch failed', e); }
 
-  const now = new Date(); // compares on UTC basis; we display in AWST
+  const now = new Date();
   const schedule = buildDaySchedule(events, now);
   const {mode, ev} = getTodayStatus(events, now);
 
@@ -308,6 +294,25 @@ async function threeImages(base){
     clearTimeout(t); t=setTimeout(()=>show(i+1), durations[i]);
   };
   show(0);
+
+  /* === AUTO REFRESH EVERY 15 MINUTES WITH STAGGER === */
+  const REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+  const podOffsets = {
+    'FernsPool': 0,          // refresh every 15 mins on the hour
+    'LuckyBay':  5 * 60 * 1000,  // +5 min
+    'ElephantRocks': 10 * 60 * 1000 // +10 min
+  };
+  const offset = podOffsets[podKey] || 0;
+  console.log(`Auto-refresh for ${podKey} every 15 mins, offset ${offset/60000} mins`);
+
+  setTimeout(()=>{
+    setInterval(()=>{
+      console.log(`Refreshing ${podKey} for updated data...`);
+      const url = new URL(window.location.href);
+      url.searchParams.set('cacheBust', Date.now());
+      window.location.replace(url.toString());
+    }, REFRESH_INTERVAL_MS);
+  }, offset);
 })();
 </script>
 </body>
